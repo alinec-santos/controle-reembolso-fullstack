@@ -2,15 +2,15 @@
 
 import express from "express"
 import cors from "cors"
+import { authRoutes } from "./routes/auth.routes"
 
 const app = express() //cria o servidor 
 
 app.use(cors()) // permite que o front acesse o back
 app.use(express.json()) //permite receber json no body das requisiçoes 
 
-// rota de teste
-app.get("/health", (req, res) => {
-  return res.status(200).json({ message: "API funcionando" })
-})
+
+
+app.use("/auth", authRoutes)
 
 export default app
