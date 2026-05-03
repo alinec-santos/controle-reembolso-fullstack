@@ -1,29 +1,40 @@
 import { PrismaClient, UserRole } from "@prisma/client"
+import bcrypt from "bcrypt"
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Usuário Admin
-  await prisma.user.create({
-    data: {
-      name: "Admin",
-      email: "admin@email.com",
-      password: "123456",
-      role: UserRole.ADMIN
-    }
+  const passwordHash = await bcrypt.hash("123456", 10)
+
+  await prisma.user.createMany({
+    data: [
+      {
+        name: "Admin",
+        email: "admin@email.com",
+        password: passwordHash,
+        role: UserRole.ADMIN
+      },
+      {
+        name: "Colaborador",
+        email: "colaborador@email.com",
+        password: passwordHash,
+        role: UserRole.COLABORADOR
+      },
+      {
+        name: "Gestor",
+        email: "gestor@email.com",
+        password: passwordHash,
+        role: UserRole.GESTOR
+      },
+      {
+        name: "Financeiro",
+        email: "financeiro@email.com",
+        password: passwordHash,
+        role: UserRole.FINANCEIRO
+      }
+    ]
   })
 
-  // Usuário Colaborador
-  await prisma.user.create({
-    data: {
-      name: "Colaborador",
-      email: "colaborador@email.com",
-      password: "123456",
-      role: UserRole.COLABORADOR
-    }
-  })
-
-  // Categorias
   await prisma.category.createMany({
     data: [
       { name: "Alimentação" },
