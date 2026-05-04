@@ -25,7 +25,7 @@ export async function authMiddleware(
   }
 
   try {
-    const decoded = jwt.verify(token, "secret") as JwtPayload //usa a biblioteca para verificar se o token é valido
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload //usa a biblioteca para verificar se o token é valido
 
     const user = await prisma.user.findUnique({ //mesmo que o token seja valido, o usuario pode ter sido deletado do sistema. Por seguranca usamos o prisma para buscar esse usuario no bd
       where: { id: decoded.userId },
