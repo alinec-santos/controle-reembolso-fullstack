@@ -31,7 +31,7 @@ export async function loginController(req: Request, res: Response) {
         userId: user.id,
         role: user.role
       },
-      "secret",
+      process.env.JWT_SECRET!,
       { expiresIn: "1d" }
     )
 
