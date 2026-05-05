@@ -9,6 +9,7 @@ import { submitRequestController } from "../modules/reimbursement/controllers/su
 import { updateRequestController } from "../modules/reimbursement/controllers/update.controller"
 import { approveRequestController } from "../modules/reimbursement/controllers/approve.controller"
 import { rejectRequestController } from "../modules/reimbursement/controllers/reject.controller"
+import { payRequestController } from "../modules/reimbursement/controllers/pay.controller"
 
 const router = Router()
 
@@ -51,5 +52,11 @@ router.post(
   authMiddleware,
   roleMiddleware([UserRole.GESTOR]),
   rejectRequestController
+)
+router.post(
+  "/:id/pay",
+  authMiddleware,
+  roleMiddleware([UserRole.FINANCEIRO]),
+  payRequestController
 )
 export { router as reimbursementRoutes }
