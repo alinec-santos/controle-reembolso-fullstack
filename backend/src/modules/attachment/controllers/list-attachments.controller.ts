@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { RequestStatus, UserRole } from "@prisma/client"
 import { prisma } from "../../../lib/prisma"
+import { AppError } from "../../../errors/AppError"
 
 export async function listAttachmentsController(req: Request, res: Response) {
   const { id } = req.params
@@ -11,15 +12,15 @@ export async function listAttachmentsController(req: Request, res: Response) {
   })
 
   if (!request) {
-    return res.status(404).json({ message: "Solicitação não encontrada" })
+    throw new AppError("Solicitação não encontrada", 404)
   }
 
   if (user.role === UserRole.COLABORADOR && request.userId !== user.id) {
-    return res.status(403).json({ message: "Usuário sem permissão" })
+    throw new AppError("Usuário sem permissão", 403)
   }
 
   if (user.role === UserRole.GESTOR && request.status !== RequestStatus.ENVIADO) {
-    return res.status(403).json({ message: "Usuário sem permissão" })
+    throw new AppError("Usuário sem permissão", 403)
   }
 
   if (
@@ -27,7 +28,7 @@ export async function listAttachmentsController(req: Request, res: Response) {
     request.status !== RequestStatus.APROVADO &&
     request.status !== RequestStatus.PAGO
   ) {
-    return res.status(403).json({ message: "Usuário sem permissão" })
+    throw new AppError("Usuário sem permissão", 403)
   }
 
   const attachments = await prisma.attachment.findMany({

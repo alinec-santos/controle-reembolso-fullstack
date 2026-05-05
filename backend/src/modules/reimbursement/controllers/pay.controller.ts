@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { prisma } from "../../../lib/prisma"
 import { RequestAction, RequestStatus } from "@prisma/client"
+import { AppError } from "../../../errors/AppError"
 
 export async function payRequestController(req: Request, res: Response) {
   const { id } = req.params
@@ -11,13 +12,11 @@ export async function payRequestController(req: Request, res: Response) {
   })
 
   if (!request) { //verifica a existencia 
-    return res.status(404).json({ message: "Solicitação não encontrada" })
+    throw new AppError("Solicitação não encontrada", 404)
   }
 
   if (request.status !== RequestStatus.APROVADO) { //impede pagamento indevido
-    return res.status(400).json({
-      message: "Apenas solicitações APROVADAS podem ser pagas"
-    })
+    throw new AppError("Apenas solicitações APROVADAS podem ser pagas", 400)
   }
 
   const updatedRequest = await prisma.reimbursementRequest.update({

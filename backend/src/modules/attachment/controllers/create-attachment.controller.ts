@@ -3,6 +3,7 @@ import { RequestStatus, UserRole } from "@prisma/client"
 import { ZodError } from "zod"
 import { prisma } from "../../../lib/prisma"
 import { createAttachmentSchema } from "../schemas/create-attachment.schema"
+import { AppError } from "../../../errors/AppError"
 
 export async function createAttachmentController(req: Request, res: Response) {
   try {
@@ -16,17 +17,15 @@ export async function createAttachmentController(req: Request, res: Response) {
     })
 
     if (!request) {
-      return res.status(404).json({ message: "Solicitação não encontrada" })
+      throw new AppError("Solicitação não encontrada", 404)
     }
 
     if (user.role === UserRole.COLABORADOR && request.userId !== user.id) {
-      return res.status(403).json({ message: "Usuário sem permissão" })
+      throw new AppError("Usuário sem permissão", 403)
     }
 
     if (request.status !== RequestStatus.RASCUNHO) {
-      return res.status(400).json({
-        message: "Anexos só podem ser adicionados em solicitações em RASCUNHO"
-      })
+        throw new AppError("Anexos só podem ser adicionados em solicitações em RASCUNHO", 400)
     }
 
     const attachment = await prisma.attachment.create({

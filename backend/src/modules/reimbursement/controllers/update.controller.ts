@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { RequestAction, RequestStatus } from "@prisma/client"
 import { prisma } from "../../../lib/prisma"
 import { updateRequestSchema } from "../schemas/update.schema"
+import { AppError } from "../../../errors/AppError"
 
 export async function updateRequestController(req: Request, res: Response) {
   const { id } = req.params //pega o id da solicitacao pela URL
@@ -14,17 +15,15 @@ export async function updateRequestController(req: Request, res: Response) {
   })
 
   if (!request) {
-    return res.status(404).json({ message: "Solicitação não encontrada" })
+    throw new AppError("Solicitação não encontrada", 404)
   }
 
   if (request.userId !== user.id) { //garante que so o dono edite
-    return res.status(403).json({ message: "Usuário sem permissão" })
+    throw new AppError("Usuário sem permissão", 403)
   }
 
   if (request.status !== RequestStatus.RASCUNHO) { //garante que nao seja possivel editar depois do envio
-    return res.status(400).json({
-      message: "Apenas solicitações em RASCUNHO podem ser editadas"
-    })
+    throw new AppError("Apenas solicitações em RASCUNHO podem ser enviadas para análise", 400)
   }
 
   const updatedRequest = await prisma.reimbursementRequest.update({ //atualiza os dados permitidos

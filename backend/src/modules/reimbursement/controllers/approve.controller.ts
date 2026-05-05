@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { RequestAction, RequestStatus } from "@prisma/client"
 import { prisma } from "../../../lib/prisma"
+import { AppError } from "../../../errors/AppError"
 
 export async function approveRequestController(req: Request, res: Response) {
   const { id } = req.params
@@ -11,13 +12,11 @@ export async function approveRequestController(req: Request, res: Response) {
   })
 
   if (!request) {
-    return res.status(404).json({ message: "Solicitação não encontrada" })
+    throw new AppError("Solicitação não encontrada", 404)
   }
 
   if (request.status !== RequestStatus.ENVIADO) {
-    return res.status(400).json({
-      message: "Apenas solicitações ENVIADAS podem ser aprovadas"
-    })
+    throw new AppError("Apenas solicitações ENVIADAS podem ser aprovadas", 400)
   }
 
   const updatedRequest = await prisma.reimbursementRequest.update({
