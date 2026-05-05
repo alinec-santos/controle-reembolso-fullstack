@@ -7,6 +7,7 @@ import { listRequestsController } from "../modules/reimbursement/controllers/lis
 import { showRequestController } from "../modules/reimbursement/controllers/show.controller"
 import { submitRequestController } from "../modules/reimbursement/controllers/submit.controller"
 import { updateRequestController } from "../modules/reimbursement/controllers/update.controller"
+import { approveRequestController } from "../modules/reimbursement/controllers/approve.controller"
 
 const router = Router()
 
@@ -38,5 +39,10 @@ router.put(
   roleMiddleware([UserRole.COLABORADOR]),
   updateRequestController
 )
-
+router.post(
+  "/:id/approve",
+  authMiddleware,
+  roleMiddleware([UserRole.GESTOR]),
+  approveRequestController
+)
 export { router as reimbursementRoutes }
