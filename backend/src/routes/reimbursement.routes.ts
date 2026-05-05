@@ -5,6 +5,7 @@ import { roleMiddleware } from "../middlewares/role.middleware"
 import { UserRole } from "@prisma/client"
 import { listRequestsController } from "../modules/reimbursement/controllers/list.controller"
 import { showRequestController } from "../modules/reimbursement/controllers/show.controller"
+import { submitRequestController } from "../modules/reimbursement/controllers/submit.controller"
 
 const router = Router()
 
@@ -23,6 +24,12 @@ router.get(
   "/:id",
   authMiddleware,
   showRequestController
+)
+router.post(
+  "/:id/submit",
+  authMiddleware,
+  roleMiddleware([UserRole.COLABORADOR]),
+  submitRequestController
 )
 
 export { router as reimbursementRoutes }
