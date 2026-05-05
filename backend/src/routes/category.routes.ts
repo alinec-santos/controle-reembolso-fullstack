@@ -5,6 +5,10 @@ import { createCategoryController } from "../modules/category/controllers/create
 import { updateCategoryController } from "../modules/category/controllers/update.controller"
 import { authMiddleware } from "../middlewares/auth.middleware"
 import { roleMiddleware } from "../middlewares/role.middleware"
+import { validateParams } from "../middlewares/validate-params.middleware"
+import { validateParams } from "../middlewares/validate-params.middleware"
+import { idParamsSchema } from "../schemas/params.schema"
+
 
 
 const router = Router()
@@ -21,6 +25,7 @@ router.post(
 router.put(
   "/:id",
   authMiddleware,
+   validateParams(idParamsSchema),
   roleMiddleware([UserRole.ADMIN]),
   updateCategoryController
 )

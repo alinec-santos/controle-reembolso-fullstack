@@ -13,6 +13,8 @@ import { payRequestController } from "../modules/reimbursement/controllers/pay.c
 import { historyRequestController } from "../modules/reimbursement/controllers/history.controller"
 import { createAttachmentController } from "../modules/attachment/controllers/create-attachment.controller"
 import { listAttachmentsController } from "../modules/attachment/controllers/list-attachments.controller"
+import { validateParams } from "../middlewares/validate-params.middleware"
+import { idParamsSchema } from "../schemas/params.schema"
 
 const router = Router()
 
@@ -22,7 +24,7 @@ router.post( //cria a solicitacao de reembolso
   roleMiddleware([UserRole.COLABORADOR]),
   createRequestController
 )
-router.get( //lista solicitacoes conforme perfil do usuario 
+router.get( //lista solicitacoes conforme perfil do usuario
   "/",
   authMiddleware,
   listRequestsController
@@ -30,38 +32,45 @@ router.get( //lista solicitacoes conforme perfil do usuario
 router.get( //Lista histórico da solicitação
   "/:id/history",
   authMiddleware,
+  validateParams(idParamsSchema),
   historyRequestController
 )
 router.post(
   "/:id/attachments",
   authMiddleware,
+  validateParams(idParamsSchema),
   createAttachmentController
 )
 
 router.get(
   "/:id/attachments",
   authMiddleware,
+  validateParams(idParamsSchema),
   listAttachmentsController
 )
 router.get( //	Detalha solicitação específica.
   "/:id",
   authMiddleware,
+  validateParams(idParamsSchema),
   showRequestController
 )
 router.post( //Envia solicitação para análise.
   "/:id/submit",
   authMiddleware,
+  validateParams(idParamsSchema),
   roleMiddleware([UserRole.COLABORADOR]),
   submitRequestController
 )
 router.put( //Edita solicitação quando permitido
   "/:id",
   authMiddleware,
+  validateParams(idParamsSchema),
   roleMiddleware([UserRole.COLABORADOR]),
   updateRequestController
 )
 router.post( //Aprova solicitação enviada
   "/:id/approve",
+  validateParams(idParamsSchema),
   authMiddleware,
   roleMiddleware([UserRole.GESTOR]),
   approveRequestController
@@ -69,12 +78,14 @@ router.post( //Aprova solicitação enviada
 router.post(//Rejeita solicitação enviada com justificativa
   "/:id/reject",
   authMiddleware,
+  validateParams(idParamsSchema),
   roleMiddleware([UserRole.GESTOR]),
   rejectRequestController
 )
 router.post(//Marca solicitação aprovada como paga
   "/:id/pay",
   authMiddleware,
+  validateParams(idParamsSchema),
   roleMiddleware([UserRole.FINANCEIRO]),
   payRequestController
 )
