@@ -6,6 +6,7 @@ import { updateCategoryController } from "../modules/category/controllers/update
 import { authMiddleware } from "../middlewares/auth.middleware"
 import { roleMiddleware } from "../middlewares/role.middleware"
 
+
 const router = Router()
 
 router.get("/", authMiddleware, listCategoriesController)

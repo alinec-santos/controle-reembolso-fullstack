@@ -11,6 +11,8 @@ import { approveRequestController } from "../modules/reimbursement/controllers/a
 import { rejectRequestController } from "../modules/reimbursement/controllers/reject.controller"
 import { payRequestController } from "../modules/reimbursement/controllers/pay.controller"
 import { historyRequestController } from "../modules/reimbursement/controllers/history.controller"
+import { createAttachmentController } from "../modules/attachment/controllers/create-attachment.controller"
+import { listAttachmentsController } from "../modules/attachment/controllers/list-attachments.controller"
 
 const router = Router()
 
@@ -29,6 +31,17 @@ router.get( //Lista histórico da solicitação
   "/:id/history",
   authMiddleware,
   historyRequestController
+)
+router.post(
+  "/:id/attachments",
+  authMiddleware,
+  createAttachmentController
+)
+
+router.get(
+  "/:id/attachments",
+  authMiddleware,
+  listAttachmentsController
 )
 router.get( //	Detalha solicitação específica.
   "/:id",
