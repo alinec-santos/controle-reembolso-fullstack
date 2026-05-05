@@ -15,6 +15,8 @@ import { createAttachmentController } from "../modules/attachment/controllers/cr
 import { listAttachmentsController } from "../modules/attachment/controllers/list-attachments.controller"
 import { validateParams } from "../middlewares/validate-params.middleware"
 import { idParamsSchema } from "../schemas/params.schema"
+import { validateQuery } from "../middlewares/validate-query.middleware"
+import { listRequestsQuerySchema } from "../schemas/query.schema"
 
 const router = Router()
 
@@ -27,6 +29,7 @@ router.post( //cria a solicitacao de reembolso
 router.get( //lista solicitacoes conforme perfil do usuario
   "/",
   authMiddleware,
+  validateQuery(listRequestsQuerySchema),
   listRequestsController
 )
 router.get( //Lista histórico da solicitação
