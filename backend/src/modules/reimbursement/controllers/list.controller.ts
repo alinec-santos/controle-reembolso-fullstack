@@ -1,9 +1,10 @@
 import { Request, Response } from "express"
 import { RequestStatus, UserRole } from "@prisma/client"
 import { prisma } from "../../../lib/prisma"
+import { formatDate, formatDateTime } from "../../../lib/formatDate"
 
 export async function listRequestsController(req: Request, res: Response) {
-  const user = req.user! //pegamos o usuario autenticado - o req.user foi preenchido pelo authMiddleware
+  const user = req.user! // pegamos o usuario autenticado - o req.user foi preenchido pelo authMiddleware
 
   let where = {} // se for adm lista tudo
 
@@ -43,5 +44,12 @@ export async function listRequestsController(req: Request, res: Response) {
     }
   })
 
-  return res.status(200).json(requests)
+  return res.status(200).json(
+    requests.map((request) => ({
+      ...request,
+      expenseDate: formatDate(request.expenseDate),
+      createdAt: formatDateTime(request.createdAt),
+      updatedAt: formatDateTime(request.updatedAt)
+    }))
+  )
 }

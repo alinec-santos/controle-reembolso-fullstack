@@ -3,6 +3,7 @@ import bcrypt from "bcrypt"
 import { prisma } from "../../../lib/prisma"
 import { createUserSchema } from "../schemas/create-user.schema"
 import { AppError } from "../../../errors/AppError"
+import { formatDateTime } from "../../../lib/formatDate"
 
 export async function createUserController(req: Request, res: Response) {
   const data = createUserSchema.parse(req.body)
@@ -36,5 +37,9 @@ export async function createUserController(req: Request, res: Response) {
     }
   })
 
-  return res.status(201).json(user)
+  return res.status(201).json({
+    ...user,
+    createdAt: formatDateTime(user.createdAt),
+    updatedAt: formatDateTime(user.updatedAt)
+  })
 }

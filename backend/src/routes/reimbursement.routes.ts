@@ -17,6 +17,7 @@ import { validateParams } from "../middlewares/validate-params.middleware"
 import { idParamsSchema } from "../schemas/params.schema"
 import { validateQuery } from "../middlewares/validate-query.middleware"
 import { listRequestsQuerySchema } from "../schemas/query.schema"
+import { cancelRequestController } from "../modules/reimbursement/controllers/cancel.controller"
 
 const router = Router()
 
@@ -91,6 +92,13 @@ router.post(//Marca solicitação aprovada como paga
   validateParams(idParamsSchema),
   roleMiddleware([UserRole.FINANCEIRO]),
   payRequestController
+)
+router.post(
+  "/:id/cancel",
+  authMiddleware,
+  validateParams(idParamsSchema),
+  roleMiddleware([UserRole.COLABORADOR]),
+  cancelRequestController
 )
 
 export { router as reimbursementRoutes }

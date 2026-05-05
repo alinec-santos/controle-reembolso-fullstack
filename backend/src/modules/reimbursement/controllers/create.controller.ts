@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { prisma } from "../../../lib/prisma"
 import { AppError } from "../../../errors/AppError"
 import { createRequestSchema } from "../schemas/create.schema"
+import { formatDateTime, parseDate } from "../../../lib/formatDate"
 
 export async function createRequestController(req: Request, res: Response) {
   const data = createRequestSchema.parse(req.body)
@@ -20,7 +21,7 @@ export async function createRequestController(req: Request, res: Response) {
       categoryId: data.categoryId,
       description: data.description,
       amount: data.amount,
-      expenseDate: new Date(data.expenseDate)
+      expenseDate: parseDate(data.expenseDate) // DayJS valida e converte a string para Date
     }
   })
 
@@ -33,5 +34,10 @@ export async function createRequestController(req: Request, res: Response) {
     }
   })
 
-  return res.status(201).json(request)
+  return res.status(201).json({
+    ...request,
+    expenseDate: formatDateTime(request.expenseDate),
+    createdAt: formatDateTime(request.createdAt),
+    updatedAt: formatDateTime(request.updatedAt)
+  })
 }
