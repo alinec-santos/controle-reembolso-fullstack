@@ -80,49 +80,31 @@ export function ReimbursementDetail() {
       <h1>Detalhe da solicitação</h1>
 
       <section>
-        <p>
-          <strong>Descrição:</strong> {request.description}
-        </p>
+        <h2>Ações</h2>
 
-        <p>
-          <strong>Categoria:</strong> {request.category?.name}
-        </p>
-
-        <p>
-          <strong>Valor:</strong>{" "}
-          {Number(request.amount).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          })}
-        </p>
-
-        <p>
-          <strong>Data da despesa:</strong>{" "}
-          {new Date(request.expenseDate).toLocaleDateString("pt-BR")}
-        </p>
-
-        <p>
-          <strong>Status:</strong> {request.status}
-        </p>
-
-        {request.rejectionReason && (
-          <p>
-            <strong>Motivo da rejeição:</strong> {request.rejectionReason}
-          </p>
+        {user?.role === "COLABORADOR" && request.status === "RASCUNHO" && (
+            <>
+            <button>Editar solicitação</button>
+            <button>Enviar solicitação</button>
+            <button>Cancelar solicitação</button>
+            </>
         )}
 
-        {request.user && (
-          <>
-            <p>
-              <strong>Solicitante:</strong> {request.user.name}
-            </p>
-
-            <p>
-              <strong>Email:</strong> {request.user.email}
-            </p>
-          </>
+        {user?.role === "COLABORADOR" && request.status === "ENVIADO" && (
+            <button>Cancelar solicitação</button>
         )}
-      </section>
+
+        {user?.role === "GESTOR" && request.status === "ENVIADO" && (
+            <>
+            <button>Aprovar</button>
+            <button>Rejeitar</button>
+            </>
+        )}
+
+        {user?.role === "FINANCEIRO" && request.status === "APROVADO" && (
+            <button>Marcar como paga</button>
+        )}
+        </section>
 
       <section>
         <h2>Ações</h2>
