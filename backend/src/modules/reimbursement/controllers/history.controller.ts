@@ -18,7 +18,12 @@ export async function historyRequestController(req: Request, res: Response) {
     return res.status(403).json({ message: "Usuário sem permissão" })
   }
 
-  if (user.role === UserRole.GESTOR && request.status !== RequestStatus.ENVIADO) {
+  if (
+  user.role === UserRole.GESTOR &&
+  request.status !== RequestStatus.ENVIADO &&
+  request.status !== RequestStatus.APROVADO &&
+  request.status !== RequestStatus.REJEITADO
+  ) {
     return res.status(403).json({ message: "Usuário sem permissão" })
   }
 
