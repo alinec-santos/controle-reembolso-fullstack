@@ -75,48 +75,88 @@ export function ReimbursementDetail() {
 
   return (
     <main>
-      <button onClick={() => navigate("/dashboard")}>Voltar</button>
+        <button onClick={() => navigate("/")}>
+        Voltar
+        </button>
 
-      <h1>Detalhe da solicitação</h1>
+        <h1>Detalhe da solicitação</h1>
 
-      <section>
-        <h2>Ações</h2>
+        <section>
+        <h2>Informações da solicitação</h2>
 
-        {user?.role === "COLABORADOR" && request.status === "RASCUNHO" && (
+        <p>
+            <strong>Descrição:</strong> {request.description}
+        </p>
+
+        <p>
+            <strong>Categoria:</strong>{" "}
+            {request.category?.name ?? "Sem categoria"}
+        </p>
+
+        <p>
+            <strong>Valor:</strong>{" "}
+            R$ {Number(request.amount).toFixed(2)}
+        </p>
+
+        <p>
+            <strong>Status:</strong> {request.status}
+        </p>
+
+        <p>
+            <strong>Data da despesa:</strong>{" "}
+            {new Date(request.expenseDate).toLocaleDateString("pt-BR")}
+        </p>
+
+        {request.user && (
             <>
-            <button>Editar solicitação</button>
-            <button>Enviar solicitação</button>
-            <button>Cancelar solicitação</button>
+            <p>
+                <strong>Solicitante:</strong> {request.user.name}
+            </p>
+
+            <p>
+                <strong>Email:</strong> {request.user.email}
+            </p>
             </>
         )}
 
-        {user?.role === "COLABORADOR" && request.status === "ENVIADO" && (
-            <button>Cancelar solicitação</button>
-        )}
-
-        {user?.role === "GESTOR" && request.status === "ENVIADO" && (
-            <>
-            <button>Aprovar</button>
-            <button>Rejeitar</button>
-            </>
-        )}
-
-        {user?.role === "FINANCEIRO" && request.status === "APROVADO" && (
-            <button>Marcar como paga</button>
+        {request.rejectionReason && (
+            <p>
+            <strong>Motivo da rejeição:</strong>{" "}
+            {request.rejectionReason}
+            </p>
         )}
         </section>
 
-      <section>
+        <section>
         <h2>Ações</h2>
 
-        <p>Usuário logado: {user?.role}</p> {/**recupera o papel do usuario logado atraves de useAuth */}
+        {user?.role === "COLABORADOR" &&
+            request.status === "RASCUNHO" && (
+            <>
+                <button>Editar solicitação</button>
+                <button>Enviar solicitação</button>
+                <button>Cancelar solicitação</button>
+            </>
+            )}
 
-        <button disabled>Enviar solicitação</button>
-        <button disabled>Aprovar</button>
-        <button disabled>Rejeitar</button>
-        <button disabled>Pagar</button>
-        <button disabled>Editar</button>
-      </section>
+        {user?.role === "COLABORADOR" &&
+            request.status === "ENVIADO" && (
+            <button>Cancelar solicitação</button>
+            )}
+
+        {user?.role === "GESTOR" &&
+            request.status === "ENVIADO" && (
+            <>
+                <button>Aprovar</button>
+                <button>Rejeitar</button>
+            </>
+            )}
+
+        {user?.role === "FINANCEIRO" &&
+            request.status === "APROVADO" && (
+            <button>Marcar como paga</button>
+            )}
+        </section>
     </main>
-  )
+    )
 }

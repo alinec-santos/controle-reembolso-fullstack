@@ -43,7 +43,7 @@ export function Dashboard() {
         <button onClick={() => navigate("/reimbursements/new")}>
           Nova solicitação
         </button>
-)}
+        )}
 
         <button onClick={logout}>Sair</button>
       </header>
