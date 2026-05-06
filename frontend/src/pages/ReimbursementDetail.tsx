@@ -58,6 +58,7 @@ export function ReimbursementDetail() {
   const [request, setRequest] = useState<Reimbursement | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [actionLoading, setActionLoading] = useState(false)
 
   async function loadRequest() {
     try {
@@ -72,6 +73,21 @@ export function ReimbursementDetail() {
       setLoading(false)
     }
   }
+
+  async function handleSubmitRequest() {
+    try {
+        setActionLoading(true)
+        setError("")
+
+        await api.post(`/reimbursements/${request?.id}/submit`)
+
+        await loadRequest()
+    } catch {
+        setError("Erro ao enviar solicitação")
+    } finally {
+        setActionLoading(false)
+    }
+    }
 
   useEffect(() => {
     loadRequest()
@@ -198,7 +214,13 @@ export function ReimbursementDetail() {
         {user?.role === "COLABORADOR" && request.status === "RASCUNHO" && (
           <>
             <button type="button">Editar solicitação</button>
-            <button type="button">Enviar solicitação</button>
+            <button
+                type="button"
+                onClick={handleSubmitRequest}
+                disabled={actionLoading}
+            >
+                {actionLoading ? "Enviando..." : "Enviar solicitação"}
+            </button>
             <button type="button">Cancelar solicitação</button>
           </>
         )}
