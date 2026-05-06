@@ -1,3 +1,7 @@
+// Middleware de autenticação.
+// Verifica se a requisição possui um token JWT válido.
+// Se o token for válido, busca o usuário no banco e adiciona seus dados em req.user.
+// Isso permite que as próximas camadas saibam quem é o usuário autenticado.
 import { NextFunction, Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma"

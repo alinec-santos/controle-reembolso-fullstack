@@ -1,3 +1,5 @@
+// Middleware global de tratamento de erros.
+// Centraliza as respostas de erro da aplicação para evitar duplicação nos controllers.
 import { NextFunction, Request, Response } from "express"
 import { ZodError } from "zod"
 import { AppError } from "../errors/AppError"

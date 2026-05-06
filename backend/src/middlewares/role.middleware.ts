@@ -1,3 +1,5 @@
+// Middleware de autorização.
+// Verifica se o usuário autenticado possui uma das permissões necessárias para acessar a rota.
 import { UserRole } from "@prisma/client"
 import { NextFunction, Request, Response } from "express"
 
