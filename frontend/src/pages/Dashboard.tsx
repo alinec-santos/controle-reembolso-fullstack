@@ -66,6 +66,7 @@ export function Dashboard() {
                 <th>Valor</th>
                 <th>Status</th>
                 <th>Data da despesa</th>
+                <th>Ações</th>
               </tr>
             </thead>
 
@@ -78,6 +79,11 @@ export function Dashboard() {
                   <td>{request.status}</td>
                   <td>
                     {new Date(request.expenseDate).toLocaleDateString("pt-BR")}
+                  </td>
+                  <td>
+                    <button onClick={() => navigate(`/reimbursements/${request.id}`)}>
+                      Ver detalhes
+                    </button>
                   </td>
                 </tr>
               ))}
