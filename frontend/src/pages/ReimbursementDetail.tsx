@@ -3,7 +3,31 @@ import { useNavigate, useParams } from "react-router-dom"
 import { api } from "../api/api"
 import { useAuth } from "../contexts/AuthContext"
 
-type Reimbursement = { //garante que o TypeScript saiba quais propriedades existem no objeto.
+type Attachment = {
+  id: string
+  requestId: string
+  fileName: string
+  fileType: string
+  fileUrl: string
+  createdAt: string
+}
+
+type History = {
+  id: string
+  requestId: string
+  userId: string
+  action: string
+  observation?: string | null
+  createdAt: string
+  user?: {
+    id: string
+    name: string
+    email: string
+    role: string
+  }
+}
+
+type Reimbursement = {
   id: string
   description: string
   amount: number
@@ -22,6 +46,8 @@ type Reimbursement = { //garante que o TypeScript saiba quais propriedades exist
     email: string
     role: string
   }
+  attachments?: Attachment[]
+  histories?: History[]
 }
 
 export function ReimbursementDetail() {
@@ -29,9 +55,9 @@ export function ReimbursementDetail() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  const [request, setRequest] = useState<Reimbursement | null>(null) //armazena os dados do reembolso apos virem da API
-  const [loading, setLoading] = useState(true) //controla se uma mensagem de carregando deve aparecer
-  const [error, setError] = useState("") //armazena mensagens de erro caso a requisicao falhe
+  const [request, setRequest] = useState<Reimbursement | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   async function loadRequest() {
     try {
@@ -40,7 +66,7 @@ export function ReimbursementDetail() {
 
       const response = await api.get(`/reimbursements/${id}`)
       setRequest(response.data)
-    } catch (error) {
+    } catch {
       setError("Não foi possível carregar os detalhes da solicitação.")
     } finally {
       setLoading(false)
@@ -59,7 +85,10 @@ export function ReimbursementDetail() {
     return (
       <main>
         <p>{error}</p>
-        <button onClick={() => navigate("/dashboard")}>Voltar</button>
+
+        <button type="button" onClick={() => navigate("/")}>
+          Voltar
+        </button>
       </main>
     )
   }
@@ -68,95 +97,160 @@ export function ReimbursementDetail() {
     return (
       <main>
         <p>Solicitação não encontrada.</p>
-        <button onClick={() => navigate("/dashboard")}>Voltar</button>
+
+        <button type="button" onClick={() => navigate("/")}>
+          Voltar
+        </button>
       </main>
     )
   }
 
   return (
     <main>
-        <button onClick={() => navigate("/")}>
+      <button type="button" onClick={() => navigate("/")}>
         Voltar
-        </button>
+      </button>
 
-        <h1>Detalhe da solicitação</h1>
+      <h1>Detalhe da solicitação</h1>
 
-        <section>
+      <section>
         <h2>Informações da solicitação</h2>
 
         <p>
-            <strong>Descrição:</strong> {request.description}
+          <strong>Descrição:</strong> {request.description}
         </p>
 
         <p>
-            <strong>Categoria:</strong>{" "}
-            {request.category?.name ?? "Sem categoria"}
+          <strong>Categoria:</strong>{" "}
+          {request.category?.name ?? "Sem categoria"}
         </p>
 
         <p>
-            <strong>Valor:</strong>{" "}
-            R$ {Number(request.amount).toFixed(2)}
+          <strong>Valor:</strong> R$ {Number(request.amount).toFixed(2)}
         </p>
 
         <p>
-            <strong>Status:</strong> {request.status}
+          <strong>Status:</strong> {request.status}
         </p>
 
         <p>
-            <strong>Data da despesa:</strong>{" "}
-            {new Date(request.expenseDate).toLocaleDateString("pt-BR")}
+          <strong>Data da despesa:</strong> {request.expenseDate}
+        </p>
+
+        <p>
+          <strong>Criada em:</strong> {request.createdAt}
+        </p>
+
+        <p>
+          <strong>Atualizada em:</strong> {request.updatedAt}
         </p>
 
         {request.user && (
-            <>
+          <>
             <p>
-                <strong>Solicitante:</strong> {request.user.name}
+              <strong>Solicitante:</strong> {request.user.name}
             </p>
 
             <p>
-                <strong>Email:</strong> {request.user.email}
+              <strong>Email:</strong> {request.user.email}
             </p>
-            </>
+
+            <p>
+              <strong>Perfil:</strong> {request.user.role}
+            </p>
+          </>
         )}
 
         {request.rejectionReason && (
-            <p>
-            <strong>Motivo da rejeição:</strong>{" "}
-            {request.rejectionReason}
-            </p>
+          <p>
+            <strong>Motivo da rejeição:</strong> {request.rejectionReason}
+          </p>
         )}
-        </section>
+      </section>
 
-        <section>
-        <h2>Ações</h2>
+      <section>
+        <h2>Anexos</h2>
 
-        {user?.role === "COLABORADOR" &&
-            request.status === "RASCUNHO" && (
-            <>
-                <button>Editar solicitação</button>
-                <button>Enviar solicitação</button>
-                <button>Cancelar solicitação</button>
-            </>
-            )}
+        {!request.attachments || request.attachments.length === 0 ? (
+          <p>Nenhum anexo cadastrado.</p>
+        ) : (
+          <ul>
+            {request.attachments.map((attachment) => (
+              <li key={attachment.id}>
+                <a href={attachment.fileUrl} target="_blank" rel="noreferrer">
+                  {attachment.fileName}
+                </a>
 
-        {user?.role === "COLABORADOR" &&
-            request.status === "ENVIADO" && (
-            <button>Cancelar solicitação</button>
-            )}
+                <span> - {attachment.fileType}</span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-        {user?.role === "GESTOR" &&
-            request.status === "ENVIADO" && (
-            <>
-                <button>Aprovar</button>
-                <button>Rejeitar</button>
-            </>
-            )}
+        {user?.role === "COLABORADOR" && request.status === "RASCUNHO" && (
+          <button type="button">Adicionar anexo</button>
+        )}
+      </section>
 
-        {user?.role === "FINANCEIRO" &&
-            request.status === "APROVADO" && (
-            <button>Marcar como paga</button>
-            )}
-        </section>
+      <section>
+        <h2>Ações disponíveis</h2>
+
+        {user?.role === "COLABORADOR" && request.status === "RASCUNHO" && (
+          <>
+            <button type="button">Editar solicitação</button>
+            <button type="button">Enviar solicitação</button>
+            <button type="button">Cancelar solicitação</button>
+          </>
+        )}
+
+        {user?.role === "COLABORADOR" && request.status === "ENVIADO" && (
+          <button type="button">Cancelar solicitação</button>
+        )}
+
+        {user?.role === "GESTOR" && request.status === "ENVIADO" && (
+          <>
+            <button type="button">Aprovar</button>
+            <button type="button">Rejeitar</button>
+          </>
+        )}
+
+        {user?.role === "FINANCEIRO" && request.status === "APROVADO" && (
+          <button type="button">Marcar como paga</button>
+        )}
+      </section>
+
+      <section>
+        <h2>Histórico da solicitação</h2>
+
+        {!request.histories || request.histories.length === 0 ? (
+          <p>Nenhum histórico encontrado.</p>
+        ) : (
+          <ul>
+            {request.histories.map((history) => (
+              <li key={history.id}>
+                <p>
+                  <strong>Ação:</strong> {history.action}
+                </p>
+
+                <p>
+                  <strong>Usuário:</strong>{" "}
+                  {history.user?.name ?? "Usuário não informado"}
+                </p>
+
+                <p>
+                  <strong>Data/hora:</strong> {history.createdAt}
+                </p>
+
+                {history.observation && (
+                  <p>
+                    <strong>Observação:</strong> {history.observation}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
-    )
+  )
 }
