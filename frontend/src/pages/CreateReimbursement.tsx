@@ -1,10 +1,12 @@
 import { FormEvent, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
+import { useAuth } from "../contexts/AuthContext"
 import type { Category } from "../types"
 
 export function CreateReimbursement() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const [categories, setCategories] = useState<Category[]>([])
 
@@ -16,6 +18,8 @@ export function CreateReimbursement() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const canCreateRequest = user?.role === "COLABORADOR"
+
   async function loadCategories() {
     try {
       const response = await api.get("/categories")
@@ -26,11 +30,21 @@ export function CreateReimbursement() {
   }
 
   useEffect(() => {
+    if (!canCreateRequest) {
+      navigate("/")
+      return
+    }
+
     loadCategories()
-  }, [])
+  }, [canCreateRequest, navigate])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+
+    if (!canCreateRequest) {
+      setError("Você não tem permissão para criar solicitações.")
+      return
+    }
 
     try {
       setIsLoading(true)
@@ -40,7 +54,7 @@ export function CreateReimbursement() {
         categoryId,
         description,
         amount: Number(amount),
-        expenseDate
+        expenseDate,
       })
 
       navigate("/")

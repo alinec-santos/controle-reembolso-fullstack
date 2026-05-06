@@ -39,9 +39,11 @@ export function Dashboard() {
         <p>Bem-vindo(a), {user?.name}</p>
         <p>Perfil: {user?.role}</p>
 
+        {user?.role === "COLABORADOR" && (
         <button onClick={() => navigate("/reimbursements/new")}>
           Nova solicitação
         </button>
+)}
 
         <button onClick={logout}>Sair</button>
       </header>
