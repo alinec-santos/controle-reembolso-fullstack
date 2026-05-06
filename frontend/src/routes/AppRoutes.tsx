@@ -1,7 +1,8 @@
-import { Navigate } from "react-router-dom"
+import { Navigate, Route, Routes } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { Login } from "../pages/Login"
 import { Dashboard } from "../pages/Dashboard"
+import { CreateReimbursement } from "../pages/CreateReimbursement"
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth()
@@ -10,5 +11,11 @@ export function AppRoutes() {
     return <Login />
   }
 
-  return <Dashboard />
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/reimbursements/new" element={<CreateReimbursement />} />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  )
 }

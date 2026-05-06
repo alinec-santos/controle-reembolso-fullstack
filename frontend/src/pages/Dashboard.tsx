@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { api } from "../api/api"
 import { useAuth } from "../contexts/AuthContext"
 import type { ReimbursementRequest } from "../types"
 
 export function Dashboard() {
+  const navigate = useNavigate()
   const { user, logout } = useAuth()
 
   const [requests, setRequests] = useState<ReimbursementRequest[]>([])
@@ -15,7 +17,7 @@ export function Dashboard() {
       setIsLoading(true)
       setError("")
 
-      const response = await api.get("/reimbursements") //usa o axios configurado. Como o token ja foi salvo no authcontext, o back consegue identificar o usuario e aplicar as regras
+      const response = await api.get("/reimbursements")
 
       setRequests(response.data)
     } catch {
@@ -25,7 +27,7 @@ export function Dashboard() {
     }
   }
 
-  useEffect(() => { //quando a tela abrir carrega as solicitacoes
+  useEffect(() => {
     loadRequests()
   }, [])
 
@@ -36,6 +38,10 @@ export function Dashboard() {
 
         <p>Bem-vindo(a), {user?.name}</p>
         <p>Perfil: {user?.role}</p>
+
+        <button onClick={() => navigate("/reimbursements/new")}>
+          Nova solicitação
+        </button>
 
         <button onClick={logout}>Sair</button>
       </header>
