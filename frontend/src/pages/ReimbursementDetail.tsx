@@ -47,6 +47,8 @@ export function ReimbursementDetail() {
   const [editAmount, setEditAmount] = useState("")
   const [editExpenseDate, setEditExpenseDate] = useState("")
 
+  const [successMessage, setSuccessMessage] = useState("")
+
   async function loadRequest() {
     try {
       setLoading(true)
@@ -179,6 +181,25 @@ export function ReimbursementDetail() {
         setActionLoading(false)
     }
   }
+  async function handleApproveRequest() {
+    if (!request) return
+
+    try {
+        setActionLoading(true)
+        setError("")
+        setSuccessMessage("")
+
+        await api.post(`/reimbursements/${request.id}/approve`)
+
+        setSuccessMessage("Solicitação aprovada com sucesso.")
+
+        await loadRequest()
+    } catch {
+        setError("Erro ao aprovar solicitação")
+    } finally {
+        setActionLoading(false)
+    }
+  }
 
   useEffect(() => {
     loadRequest()
@@ -218,6 +239,7 @@ export function ReimbursementDetail() {
       </button>
 
       <h1>Detalhe da solicitação</h1>
+      {successMessage && <p>{successMessage}</p>}
 
       <ReimbursementInfo request={request} />
 

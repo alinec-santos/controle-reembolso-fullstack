@@ -47,8 +47,12 @@ export async function showRequestController(req: Request, res: Response) {
   if (user.role === UserRole.COLABORADOR && request.userId !== user.id) {
     return res.status(403).json({ message: "Usuário sem permissão" })
   }
-
-  if (user.role === UserRole.GESTOR && request.status !== RequestStatus.ENVIADO) {
+  if (
+    user.role === UserRole.GESTOR &&
+    request.status !== RequestStatus.ENVIADO &&
+    request.status !== RequestStatus.APROVADO &&
+    request.status !== RequestStatus.REJEITADO
+  ) {
     return res.status(403).json({ message: "Usuário sem permissão" })
   }
 

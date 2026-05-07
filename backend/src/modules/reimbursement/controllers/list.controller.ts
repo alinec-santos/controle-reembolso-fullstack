@@ -16,7 +16,13 @@ export async function listRequestsController(req: Request, res: Response) {
 
   if (user.role === UserRole.GESTOR) {
     where = {
-      status: RequestStatus.ENVIADO
+      status: {
+        in: [
+          RequestStatus.ENVIADO,
+          RequestStatus.APROVADO,
+          RequestStatus.REJEITADO
+      ]
+      }
     }
   }
 
