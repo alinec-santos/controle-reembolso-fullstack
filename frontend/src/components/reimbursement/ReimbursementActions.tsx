@@ -1,48 +1,46 @@
 type Props = {
   userRole?: string
-  requestStatus: string
+  status: string
   actionLoading: boolean
-  onSubmitRequest: () => Promise<void>
+  onOpenEditModal: () => void
 }
 
 export function ReimbursementActions({
   userRole,
-  requestStatus,
+  status,
   actionLoading,
-  onSubmitRequest,
+  onOpenEditModal,
 }: Props) {
   return (
     <section>
       <h2>Ações disponíveis</h2>
 
-      {userRole === "COLABORADOR" && requestStatus === "RASCUNHO" && (
+      {userRole === "COLABORADOR" && status === "RASCUNHO" && (
         <>
-          <button type="button">Editar solicitação</button>
+          <button type="button" onClick={onOpenEditModal}>
+            Editar solicitação
+          </button>
 
-          <button
-            type="button"
-            onClick={onSubmitRequest}
-            disabled={actionLoading}
-          >
-            {actionLoading ? "Enviando..." : "Enviar solicitação"}
+          <button type="button" disabled={actionLoading}>
+            Enviar solicitação
           </button>
 
           <button type="button">Cancelar solicitação</button>
         </>
       )}
 
-      {userRole === "COLABORADOR" && requestStatus === "ENVIADO" && (
+      {userRole === "COLABORADOR" && status === "ENVIADO" && (
         <button type="button">Cancelar solicitação</button>
       )}
 
-      {userRole === "GESTOR" && requestStatus === "ENVIADO" && (
+      {userRole === "GESTOR" && status === "ENVIADO" && (
         <>
           <button type="button">Aprovar</button>
           <button type="button">Rejeitar</button>
         </>
       )}
 
-      {userRole === "FINANCEIRO" && requestStatus === "APROVADO" && (
+      {userRole === "FINANCEIRO" && status === "APROVADO" && (
         <button type="button">Marcar como paga</button>
       )}
     </section>
