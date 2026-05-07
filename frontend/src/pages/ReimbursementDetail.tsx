@@ -1,64 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { api } from "../api/api"
 import { useAuth } from "../contexts/AuthContext"
+import { api } from "../api/api"
+import type { Reimbursement } from "../types/reimbursement"
 import { ReimbursementInfo } from "../components/reimbursement/ReimbursementInfo"
-import { ReimbursementAttachments } from "../components/reimbursement/ReimbursementAttachments"
-import { ReimbursementActions } from "../components/reimbursement/ReimbursementActions"
-import { ReimbursementHistory } from "../components/reimbursement/ReimbursementHistory"
-
-export type Attachment = {
-  id: string
-  requestId: string
-  fileName: string
-  fileType: string
-  fileUrl: string
-  createdAt: string
-}
-
-export type History = {
-  id: string
-  requestId: string
-  userId: string
-  action: string
-  observation?: string | null
-  createdAt: string
-  user?: {
-    id: string
-    name: string
-    email: string
-    role: string
-  }
-}
-
-export type Reimbursement = {
-  id: string
-  description: string
-  amount: number
-  expenseDate: string
-  status: string
-  rejectionReason?: string | null
-  createdAt: string
-  updatedAt: string
-  category?: {
-    id: string
-    name: string
-  }
-  user?: {
-    id: string
-    name: string
-    email: string
-    role: string
-  }
-  attachments?: Attachment[]
-  histories?: History[]
-}
-
-export type AttachmentFormData = {
-  fileName: string
-  fileType: string
-  fileUrl: string
-}
+import { AttachmentsSection } from "../components/reimbursement/ReimbursementAttachments"
+import { HistorySection } from "../components/reimbursement/ReimbursementHistory"
+import { AttachModal } from "../components/reimbursement/Attachmodal"
+import { HistoryModal } from "../components/reimbursement/Historymodal"
 
 export function ReimbursementDetail() {
   const { id } = useParams()
@@ -67,14 +16,20 @@ export function ReimbursementDetail() {
 
   const [request, setRequest] = useState<Reimbursement | null>(null)
   const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState("")
+  const [actionLoading, setActionLoading] = useState(false)
+
+  const [attachModalOpen, setAttachModalOpen] = useState(false)
+  const [fileName, setFileName] = useState("")
+  const [fileType, setFileType] = useState("")
+  const [fileUrl, setFileUrl] = useState("")
+
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
 
   async function loadRequest() {
     try {
       setLoading(true)
       setError("")
-
       const response = await api.get(`/reimbursements/${id}`)
       setRequest(response.data)
     } catch {
@@ -84,32 +39,19 @@ export function ReimbursementDetail() {
     }
   }
 
-  async function handleSubmitRequest() {
-    if (!request) return
-
+  async function handleAddAttachment() {
     try {
       setActionLoading(true)
       setError("")
-
-      await api.post(`/reimbursements/${request.id}/submit`)
-
-      await loadRequest()
-    } catch {
-      setError("Erro ao enviar solicitação")
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  async function handleAddAttachment(data: AttachmentFormData) {
-    if (!request) return
-
-    try {
-      setActionLoading(true)
-      setError("")
-
-      await api.post(`/reimbursements/${request.id}/attachments`, data)
-
+      await api.post(`/reimbursements/${request?.id}/attachments`, {
+        fileName,
+        fileType,
+        fileUrl,
+      })
+      setFileName("")
+      setFileType("")
+      setFileUrl("")
+      setAttachModalOpen(false)
       await loadRequest()
     } catch {
       setError("Erro ao adicionar anexo")
@@ -118,22 +60,24 @@ export function ReimbursementDetail() {
     }
   }
 
+  function handleCloseAttachModal() {
+    setAttachModalOpen(false)
+    setFileName("")
+    setFileType("")
+    setFileUrl("")
+  }
+
   useEffect(() => {
     loadRequest()
   }, [id])
 
-  if (loading) {
-    return <p>Carregando solicitação...</p>
-  }
+  if (loading) return <p>Carregando solicitação...</p>
 
   if (error) {
     return (
       <main>
         <p>{error}</p>
-
-        <button type="button" onClick={() => navigate("/")}>
-          Voltar
-        </button>
+        <button type="button" onClick={() => navigate("/")}>Voltar</button>
       </main>
     )
   }
@@ -142,40 +86,45 @@ export function ReimbursementDetail() {
     return (
       <main>
         <p>Solicitação não encontrada.</p>
-
-        <button type="button" onClick={() => navigate("/")}>
-          Voltar
-        </button>
+        <button type="button" onClick={() => navigate("/")}>Voltar</button>
       </main>
     )
   }
 
   return (
     <main>
-      <button type="button" onClick={() => navigate("/")}>
-        Voltar
-      </button>
-
+      <button type="button" onClick={() => navigate("/")}>Voltar</button>
       <h1>Detalhe da solicitação</h1>
 
       <ReimbursementInfo request={request} />
 
-      <ReimbursementAttachments
-        attachments={request.attachments ?? []}
+      <AttachmentsSection
+        attachments={request.attachments}
         userRole={user?.role}
-        requestStatus={request.status}
-        actionLoading={actionLoading}
-        onAddAttachment={handleAddAttachment}
+        status={request.status}
+        onOpenModal={() => setAttachModalOpen(true)}
       />
 
-      <ReimbursementActions
-        userRole={user?.role}
-        requestStatus={request.status}
+      <HistorySection onOpenModal={() => setHistoryModalOpen(true)} />
+
+      <AttachModal
+        open={attachModalOpen}
         actionLoading={actionLoading}
-        onSubmitRequest={handleSubmitRequest}
+        fileName={fileName}
+        fileType={fileType}
+        fileUrl={fileUrl}
+        onClose={handleCloseAttachModal}
+        onSubmit={handleAddAttachment}
+        onChangeFileName={setFileName}
+        onChangeFileType={setFileType}
+        onChangeFileUrl={setFileUrl}
       />
 
-      <ReimbursementHistory histories={request.histories ?? []} />
+      <HistoryModal
+        open={historyModalOpen}
+        histories={request.histories}
+        onClose={() => setHistoryModalOpen(false)}
+      />
     </main>
   )
 }
