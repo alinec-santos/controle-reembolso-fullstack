@@ -6,6 +6,7 @@ type Props = {
   onSubmitRequest: () => void
   onCancelRequest: () => void
   onApproveRequest: () => void
+  onOpenRejectModal: () => void
 }
 
 export function ReimbursementActions({
@@ -16,6 +17,7 @@ export function ReimbursementActions({
   onSubmitRequest,
   onCancelRequest,
   onApproveRequest,
+  onOpenRejectModal,
 }: Props) {
   return (
     <section>
@@ -65,7 +67,13 @@ export function ReimbursementActions({
             {actionLoading ? "Aprovando..." : "Aprovar"}
           </button>
 
-          <button type="button">Rejeitar</button>
+          <button
+            type="button"
+            onClick={onOpenRejectModal}
+            disabled={actionLoading}
+          >
+            Rejeitar
+          </button>
         </>
       )}
 

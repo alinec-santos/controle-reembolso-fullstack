@@ -11,6 +11,7 @@ import { ReimbursementActions } from "../components/reimbursement/ReimbursementA
 import { AttachModal } from "../components/reimbursement/Attachmodal"
 import { HistoryModal } from "../components/reimbursement/Historymodal"
 import { EditReimbursementModal } from "../components/reimbursement/EditReimbursementModal"
+import { RejectReimbursementModal } from "../components/reimbursement/RejectReimbursementModal"
 
 function convertBrazilianDateToInputDate(date: string) {
   const [day, month, year] = date.split("/")
@@ -48,6 +49,9 @@ export function ReimbursementDetail() {
   const [editExpenseDate, setEditExpenseDate] = useState("")
 
   const [successMessage, setSuccessMessage] = useState("")
+
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  const [rejectReason, setRejectReason] = useState("")
 
   async function loadRequest() {
     try {
@@ -202,6 +206,36 @@ export function ReimbursementDetail() {
     }
   }
   
+
+  function handleCloseRejectModal() {
+    setRejectModalOpen(false)
+    setRejectReason("")
+  }
+
+  async function handleRejectRequest() {
+    if (!request) return
+
+    try {
+      setActionLoading(true)
+      setError("")
+      setSuccessMessage("")
+
+      await api.post(`/reimbursements/${request.id}/reject`, {
+        reason: rejectReason,
+      })
+
+      setSuccessMessage("Solicitação rejeitada com sucesso.")
+
+      handleCloseRejectModal()
+
+      await loadRequest()
+    } catch {
+      setError("Erro ao rejeitar solicitação")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+  
   useEffect(() => {
     loadRequest()
     loadCategories()
@@ -261,6 +295,8 @@ export function ReimbursementDetail() {
         onOpenEditModal={handleOpenEditModal}
         onCancelRequest={handleCancelRequest}
         onApproveRequest={handleApproveRequest}
+        onOpenRejectModal={() => setRejectModalOpen(true)}
+        
       />
 
       <AttachModal
@@ -296,6 +332,15 @@ export function ReimbursementDetail() {
         onChangeDescription={setEditDescription}
         onChangeAmount={setEditAmount}
         onChangeExpenseDate={setEditExpenseDate}
+      />
+
+      <RejectReimbursementModal
+        open={rejectModalOpen}
+        reason={rejectReason}
+        actionLoading={actionLoading}
+        onClose={handleCloseRejectModal}
+        onSubmit={handleRejectRequest}
+        onChangeReason={setRejectReason}
       />
     </main>
   )
