@@ -1,29 +1,64 @@
-import { FormEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { api } from "../api/api"
 import { useAuth } from "../contexts/AuthContext"
 import type { User } from "../types/Users"
 import { UserForm } from "../components/users/UserForm"
 import { UsersTable } from "../components/users/UsersTable"
+import { getApiErrorMessage } from "../utils/getApiErrorMessage"
+
+const userSchema = z
+  .object({
+    name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+    email: z.string().email("Informe um e-mail válido"),
+    password: z.string(),
+    role: z.enum(["COLABORADOR", "GESTOR", "FINANCEIRO", "ADMIN"]),
+  })
+  .superRefine((data, context) => {
+    if (!data.password) return
+
+    if (data.password.length < 6) {
+      context.addIssue({
+        code: "custom",
+        path: ["password"],
+        message: "Senha deve ter pelo menos 6 caracteres",
+      })
+    }
+  })
+
+type UserFormData = z.infer<typeof userSchema>
 
 export function Users() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
   const [users, setUsers] = useState<User[]>([])
-
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
-
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [role, setRole] = useState("COLABORADOR")
 
   const isEditing = Boolean(editingUserId)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError: setFormError,
+    formState: { errors },
+  } = useForm<UserFormData>({
+    resolver: zodResolver(userSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      role: "COLABORADOR",
+    },
+  })
 
   async function loadUsers() {
     try {
@@ -31,10 +66,9 @@ export function Users() {
       setError("")
 
       const response = await api.get("/users")
-
       setUsers(response.data)
-    } catch {
-      setError("Erro ao carregar usuários")
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Erro ao carregar usuários"))
     } finally {
       setLoading(false)
     }
@@ -42,22 +76,34 @@ export function Users() {
 
   function resetForm() {
     setEditingUserId(null)
-    setName("")
-    setEmail("")
-    setPassword("")
-    setRole("COLABORADOR")
+
+    reset({
+      name: "",
+      email: "",
+      password: "",
+      role: "COLABORADOR",
+    })
   }
 
   function handleEdit(userToEdit: User) {
     setEditingUserId(userToEdit.id)
-    setName(userToEdit.name)
-    setEmail(userToEdit.email)
-    setPassword("")
-    setRole(userToEdit.role)
+
+    reset({
+      name: userToEdit.name,
+      email: userToEdit.email,
+      password: "",
+      role: userToEdit.role as UserFormData["role"],
+    })
   }
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
+  async function onSubmit(data: UserFormData) {
+    if (!isEditing && !data.password) {
+      setFormError("password", {
+        message: "Senha é obrigatória para criar usuário",
+      })
+
+      return
+    }
 
     try {
       setActionLoading(true)
@@ -66,28 +112,23 @@ export function Users() {
 
       if (isEditing) {
         await api.put(`/users/${editingUserId}`, {
-          name,
-          email,
-          role,
-          ...(password ? { password } : {}),
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          ...(data.password ? { password: data.password } : {}),
         })
 
         setSuccessMessage("Usuário atualizado com sucesso.")
       } else {
-        await api.post("/users", {
-          name,
-          email,
-          password,
-          role,
-        })
+        await api.post("/users", data)
 
         setSuccessMessage("Usuário criado com sucesso.")
       }
 
       resetForm()
       await loadUsers()
-    } catch {
-      setError("Erro ao salvar usuário")
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Erro ao salvar usuário"))
     } finally {
       setActionLoading(false)
     }
@@ -116,15 +157,9 @@ export function Users() {
       <UserForm
         isEditing={isEditing}
         actionLoading={actionLoading}
-        name={name}
-        email={email}
-        password={password}
-        role={role}
-        onChangeName={setName}
-        onChangeEmail={setEmail}
-        onChangePassword={setPassword}
-        onChangeRole={setRole}
-        onSubmit={handleSubmit}
+        register={register}
+        errors={errors}
+        onSubmit={handleSubmit(onSubmit)}
         onCancelEdit={resetForm}
       />
 
