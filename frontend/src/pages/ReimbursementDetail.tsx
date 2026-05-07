@@ -36,9 +36,6 @@ export function ReimbursementDetail() {
   const [actionLoading, setActionLoading] = useState(false)
 
   const [attachModalOpen, setAttachModalOpen] = useState(false)
-  const [fileName, setFileName] = useState("")
-  const [fileType, setFileType] = useState("")
-  const [fileUrl, setFileUrl] = useState("")
 
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
 
@@ -78,22 +75,19 @@ export function ReimbursementDetail() {
     }
   }
 
-  async function handleAddAttachment() {
+  async function handleAddAttachment(data: {
+    fileName: string
+    fileType: string
+    fileUrl: string
+  }) {
     if (!request) return
 
     try {
       setActionLoading(true)
       setError("")
 
-      await api.post(`/reimbursements/${request.id}/attachments`, {
-        fileName,
-        fileType,
-        fileUrl,
-      })
+      await api.post(`/reimbursements/${request.id}/attachments`, data)
 
-      setFileName("")
-      setFileType("")
-      setFileUrl("")
       setAttachModalOpen(false)
 
       await loadRequest()
@@ -106,9 +100,6 @@ export function ReimbursementDetail() {
 
   function handleCloseAttachModal() {
     setAttachModalOpen(false)
-    setFileName("")
-    setFileType("")
-    setFileUrl("")
   }
 
   function handleOpenEditModal() {
@@ -321,14 +312,8 @@ export function ReimbursementDetail() {
       <AttachModal
         open={attachModalOpen}
         actionLoading={actionLoading}
-        fileName={fileName}
-        fileType={fileType}
-        fileUrl={fileUrl}
         onClose={handleCloseAttachModal}
         onSubmit={handleAddAttachment}
-        onChangeFileName={setFileName}
-        onChangeFileType={setFileType}
-        onChangeFileUrl={setFileUrl}
       />
 
       <HistoryModal
