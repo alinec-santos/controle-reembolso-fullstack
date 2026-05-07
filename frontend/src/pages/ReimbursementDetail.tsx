@@ -163,6 +163,22 @@ export function ReimbursementDetail() {
         setActionLoading(false)
     }
   }
+  async function handleApproveRequest() {
+    if (!request) return
+
+    try {
+        setActionLoading(true)
+        setError("")
+
+        await api.post(`/reimbursements/${request.id}/approve`)
+
+        await loadRequest()
+    } catch {
+        setError("Erro ao aprovar solicitação")
+    } finally {
+        setActionLoading(false)
+    }
+  }
 
   useEffect(() => {
     loadRequest()
@@ -220,6 +236,7 @@ export function ReimbursementDetail() {
         actionLoading={actionLoading}
         onOpenEditModal={handleOpenEditModal}
         onCancelRequest={handleCancelRequest}
+        onApproveRequest={handleApproveRequest}
       />
 
       <AttachModal
