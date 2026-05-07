@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext"
 import type { Category } from "../types/category"
 import { CategoryForm } from "../components/categories/CategoryForm"
 import { CategoriesTable } from "../components/categories/CategoriesTable"
+import { AxiosError } from "axios"
 
 export function Categories() {
   const navigate = useNavigate()
@@ -79,8 +80,13 @@ export function Categories() {
       resetForm()
 
       await loadCategories()
-    } catch {
-      setError("Erro ao salvar categoria")
+    } catch (error) {
+    if (error instanceof AxiosError) {
+        setError(error.response?.data?.message ?? "Erro ao salvar categoria")
+        return
+    }
+
+    setError("Erro ao salvar categoria")
     } finally {
       setActionLoading(false)
     }
