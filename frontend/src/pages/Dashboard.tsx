@@ -45,6 +45,12 @@ export function Dashboard() {
         </button>
         )}
 
+        {user?.role === "ADMIN" && (
+        <button type="button" onClick={() => navigate("/users")}>
+          Gerenciar usuários
+        </button>
+        )}
+
         <button onClick={logout}>Sair</button>
       </header>
 

@@ -4,6 +4,7 @@ import { Login } from "../pages/Login"
 import { Dashboard } from "../pages/Dashboard"
 import { CreateReimbursement } from "../pages/CreateReimbursement"
 import { ReimbursementDetail } from "../pages/ReimbursementDetail"
+import { Users } from "../pages/Users"
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth()
@@ -17,6 +18,7 @@ export function AppRoutes() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/reimbursements/new" element={<CreateReimbursement />} />
       <Route path="/reimbursements/:id" element={<ReimbursementDetail />} />
+      <Route path="/users" element={<Users />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   )
