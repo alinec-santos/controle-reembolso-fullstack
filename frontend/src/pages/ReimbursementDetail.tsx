@@ -147,6 +147,23 @@ export function ReimbursementDetail() {
     }
   }
 
+  async function handleCancelRequest() {
+    if (!request) return
+
+    try {
+        setActionLoading(true)
+        setError("")
+
+        await api.post(`/reimbursements/${request.id}/cancel`)
+
+        await loadRequest()
+    } catch {
+        setError("Erro ao cancelar solicitação")
+    } finally {
+        setActionLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadRequest()
     loadCategories()
@@ -202,6 +219,7 @@ export function ReimbursementDetail() {
         status={request.status}
         actionLoading={actionLoading}
         onOpenEditModal={handleOpenEditModal}
+        onCancelRequest={handleCancelRequest}
       />
 
       <AttachModal

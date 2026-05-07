@@ -3,13 +3,14 @@ type Props = {
   status: string
   actionLoading: boolean
   onOpenEditModal: () => void
+  onCancelRequest: () => void
 }
-
 export function ReimbursementActions({
   userRole,
   status,
   actionLoading,
   onOpenEditModal,
+  onCancelRequest,
 }: Props) {
   return (
     <section>
@@ -25,12 +26,24 @@ export function ReimbursementActions({
             Enviar solicitação
           </button>
 
-          <button type="button">Cancelar solicitação</button>
+          <button
+            type="button"
+            onClick={onCancelRequest}
+            disabled={actionLoading}
+          >
+            {actionLoading ? "Cancelando..." : "Cancelar solicitação"}
+          </button>
         </>
       )}
 
       {userRole === "COLABORADOR" && status === "ENVIADO" && (
-        <button type="button">Cancelar solicitação</button>
+        <button
+          type="button"
+          onClick={onCancelRequest}
+          disabled={actionLoading}
+        >
+          {actionLoading ? "Cancelando..." : "Cancelar solicitação"}
+        </button>
       )}
 
       {userRole === "GESTOR" && status === "ENVIADO" && (
