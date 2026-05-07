@@ -1,31 +1,52 @@
-import { FormEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { api } from "../api/api"
 import { useAuth } from "../contexts/AuthContext"
 import type { Category } from "../types"
+import { getApiErrorMessage } from "../utils/getApiErrorMessage"
+
+const createReimbursementSchema = z.object({
+  categoryId: z.string().min(1, "Selecione uma categoria"),
+  description: z.string().min(3, "Descrição deve ter pelo menos 3 caracteres"),
+  amount: z.coerce.number().positive("Valor deve ser maior que zero"),
+  expenseDate: z.string().min(1, "Informe a data da despesa"),
+})
+
+type CreateReimbursementFormData = z.infer<typeof createReimbursementSchema>
 
 export function CreateReimbursement() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
   const [categories, setCategories] = useState<Category[]>([])
-
-  const [categoryId, setCategoryId] = useState("")
-  const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
-  const [expenseDate, setExpenseDate] = useState("")
-
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
   const canCreateRequest = user?.role === "COLABORADOR"
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateReimbursementFormData>({
+    resolver: zodResolver(createReimbursementSchema),
+    defaultValues: {
+      categoryId: "",
+      description: "",
+      amount: 0,
+      expenseDate: "",
+    },
+  })
+
   async function loadCategories() {
     try {
       const response = await api.get("/categories")
       setCategories(response.data)
-    } catch {
-      setError("Erro ao carregar categorias")
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Erro ao carregar categorias"))
     }
   }
 
@@ -38,9 +59,7 @@ export function CreateReimbursement() {
     loadCategories()
   }, [canCreateRequest, navigate])
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-
+  async function onSubmit(data: CreateReimbursementFormData) {
     if (!canCreateRequest) {
       setError("Você não tem permissão para criar solicitações.")
       return
@@ -50,20 +69,17 @@ export function CreateReimbursement() {
       setIsLoading(true)
       setError("")
 
-      await api.post("/reimbursements", {
-        categoryId,
-        description,
-        amount: Number(amount),
-        expenseDate,
-      })
+      await api.post("/reimbursements", data)
 
       navigate("/")
-    } catch {
-      setError("Erro ao criar solicitação")
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Erro ao criar solicitação"))
     } finally {
       setIsLoading(false)
     }
   }
+    const today = new Date().toISOString().split("T")[0]
+
 
   return (
     <main>
@@ -73,15 +89,10 @@ export function CreateReimbursement() {
         Voltar
       </button>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label htmlFor="categoryId">Categoria</label>
-          <select
-            id="categoryId"
-            value={categoryId}
-            onChange={(event) => setCategoryId(event.target.value)}
-            required
-          >
+          <select id="categoryId" {...register("categoryId")}>
             <option value="">Selecione uma categoria</option>
 
             {categories.map((category) => (
@@ -90,17 +101,15 @@ export function CreateReimbursement() {
               </option>
             ))}
           </select>
+
+          {errors.categoryId && <p>{errors.categoryId.message}</p>}
         </div>
 
         <div>
           <label htmlFor="description">Descrição</label>
-          <input
-            id="description"
-            type="text"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            required
-          />
+          <input id="description" type="text" {...register("description")} />
+
+          {errors.description && <p>{errors.description.message}</p>}
         </div>
 
         <div>
@@ -109,21 +118,17 @@ export function CreateReimbursement() {
             id="amount"
             type="number"
             step="0.01"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            required
+            {...register("amount")}
           />
+
+          {errors.amount && <p>{errors.amount.message}</p>}
         </div>
 
         <div>
           <label htmlFor="expenseDate">Data da despesa</label>
-          <input
-            id="expenseDate"
-            type="date"
-            value={expenseDate}
-            onChange={(event) => setExpenseDate(event.target.value)}
-            required
-          />
+          <input id="expenseDate" type="date" max={today}{...register("expenseDate")} />
+
+          {errors.expenseDate && <p>{errors.expenseDate.message}</p>}
         </div>
 
         {error && <p>{error}</p>}
