@@ -28,7 +28,12 @@ export async function listRequestsController(req: Request, res: Response) {
 
   if (user.role === UserRole.FINANCEIRO) {
     where = {
-      status: RequestStatus.APROVADO
+      status: {
+        in: [
+          RequestStatus.PAGO,
+          RequestStatus.APROVADO
+      ]
+      }
     }
   }
 

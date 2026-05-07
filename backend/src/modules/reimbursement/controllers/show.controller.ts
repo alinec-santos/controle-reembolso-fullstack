@@ -58,7 +58,8 @@ export async function showRequestController(req: Request, res: Response) {
 
   if (
     user.role === UserRole.FINANCEIRO &&
-    request.status !== RequestStatus.APROVADO
+    request.status !== RequestStatus.APROVADO &&
+    request.status !== RequestStatus.PAGO
   ) {
     return res.status(403).json({ message: "Usuário sem permissão" })
   }
