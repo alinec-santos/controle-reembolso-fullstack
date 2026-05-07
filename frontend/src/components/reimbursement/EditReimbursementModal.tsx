@@ -1,75 +1,111 @@
+import { z } from "zod"
+import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import type { Category } from "../../types"
+
+const editReimbursementSchema = z.object({
+  categoryId: z.string().min(1, "Selecione uma categoria"),
+
+  description: z
+    .string()
+    .min(3, "Descrição deve ter pelo menos 3 caracteres"),
+
+  amount: z.coerce
+    .number()
+    .positive("Valor deve ser maior que zero"),
+
+  expenseDate: z
+    .string()
+    .min(1, "Informe a data da despesa"),
+})
+
+type EditReimbursementFormData = z.infer<
+  typeof editReimbursementSchema
+>
 
 type Props = {
   open: boolean
   categories: Category[]
   actionLoading: boolean
+
   categoryId: string
   description: string
   amount: string
   expenseDate: string
+
   onClose: () => void
-  onSubmit: () => void
-  onChangeCategoryId: (value: string) => void
-  onChangeDescription: (value: string) => void
-  onChangeAmount: (value: string) => void
-  onChangeExpenseDate: (value: string) => void
+
+  onSubmit: (data: EditReimbursementFormData) => void
 }
 
 export function EditReimbursementModal({
   open,
   categories,
   actionLoading,
+
   categoryId,
   description,
   amount,
   expenseDate,
+
   onClose,
   onSubmit,
-  onChangeCategoryId,
-  onChangeDescription,
-  onChangeAmount,
-  onChangeExpenseDate,
 }: Props) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<EditReimbursementFormData>({
+    resolver: zodResolver(editReimbursementSchema),
+
+    defaultValues: {
+      categoryId: "",
+      description: "",
+      amount: 0,
+      expenseDate: "",
+    },
+  })
+
+  useEffect(() => {
+    reset({
+      categoryId,
+      description,
+      amount: Number(amount),
+      expenseDate,
+    })
+  }, [
+    categoryId,
+    description,
+    amount,
+    expenseDate,
+    reset,
+  ])
+
   if (!open) return null
 
+  function handleClose() {
+    reset()
+
+    onClose()
+  }
+
+  function submit(data: EditReimbursementFormData) {
+    onSubmit(data)
+  }
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.45)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50,
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: 12,
-          padding: "1.5rem",
-          width: 420,
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h3 style={{ margin: 0 }}>Editar solicitação</h3>
+    <div>
+      <h3>Editar solicitação</h3>
 
-          <button type="button" onClick={onClose}>
-            ✕
-          </button>
-        </div>
-
+      <form onSubmit={handleSubmit(submit)}>
         <div>
-          <label htmlFor="editCategoryId">Categoria</label>
+          <label htmlFor="categoryId">Categoria</label>
+
           <select
-            id="editCategoryId"
-            value={categoryId}
-            onChange={(event) => onChangeCategoryId(event.target.value)}
+            id="categoryId"
+            {...register("categoryId")}
           >
             <option value="">Selecione uma categoria</option>
 
@@ -79,59 +115,67 @@ export function EditReimbursementModal({
               </option>
             ))}
           </select>
+
+          {errors.categoryId && (
+            <p>{errors.categoryId.message}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="editDescription">Descrição</label>
+          <label htmlFor="description">Descrição</label>
+
           <input
-            id="editDescription"
+            id="description"
             type="text"
-            value={description}
-            onChange={(event) => onChangeDescription(event.target.value)}
+            {...register("description")}
           />
+
+          {errors.description && (
+            <p>{errors.description.message}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="editAmount">Valor</label>
+          <label htmlFor="amount">Valor</label>
+
           <input
-            id="editAmount"
+            id="amount"
             type="number"
             step="0.01"
-            value={amount}
-            onChange={(event) => onChangeAmount(event.target.value)}
+            {...register("amount")}
           />
+
+          {errors.amount && (
+            <p>{errors.amount.message}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="editExpenseDate">Data da despesa</label>
+          <label htmlFor="expenseDate">
+            Data da despesa
+          </label>
+
           <input
-            id="editExpenseDate"
+            id="expenseDate"
             type="date"
-            value={expenseDate}
-            onChange={(event) => onChangeExpenseDate(event.target.value)}
+            {...register("expenseDate")}
           />
+
+          {errors.expenseDate && (
+            <p>{errors.expenseDate.message}</p>
+          )}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button type="button" onClick={onClose}>
-            Cancelar
-          </button>
+        <button type="button" onClick={handleClose}>
+          Cancelar
+        </button>
 
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={
-              actionLoading ||
-              !categoryId ||
-              !description ||
-              !amount ||
-              !expenseDate
-            }
-          >
-            {actionLoading ? "Salvando..." : "Salvar edição"}
-          </button>
-        </div>
-      </div>
+        <button type="submit" disabled={actionLoading}>
+          {actionLoading
+            ? "Salvando..."
+            : "Salvar edição"}
+        </button>
+      </form>
     </div>
   )
 }

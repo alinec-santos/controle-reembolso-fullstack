@@ -40,10 +40,7 @@ export function ReimbursementDetail() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
 
   const [editModalOpen, setEditModalOpen] = useState(false)
-  const [editCategoryId, setEditCategoryId] = useState("")
-  const [editDescription, setEditDescription] = useState("")
-  const [editAmount, setEditAmount] = useState("")
-  const [editExpenseDate, setEditExpenseDate] = useState("")
+
 
   const [successMessage, setSuccessMessage] = useState("")
 
@@ -103,37 +100,26 @@ export function ReimbursementDetail() {
   }
 
   function handleOpenEditModal() {
-    if (!request) return
-
-    setEditCategoryId(request.category?.id ?? "")
-    setEditDescription(request.description)
-    setEditAmount(String(request.amount))
-    setEditExpenseDate(convertBrazilianDateToInputDate(request.expenseDate))
     setEditModalOpen(true)
   }
 
   function handleCloseEditModal() {
     setEditModalOpen(false)
-    setEditCategoryId("")
-    setEditDescription("")
-    setEditAmount("")
-    setEditExpenseDate("")
   }
 
-  async function handleUpdateRequest() {
+  async function handleUpdateRequest(data: {
+    categoryId: string
+    description: string
+    amount: number
+    expenseDate: string 
+  }) {
     if (!request) return
 
     try {
       setActionLoading(true)
       setError("")
 
-      await api.put(`/reimbursements/${request.id}`, {
-        categoryId: editCategoryId,
-        description: editDescription,
-        amount: Number(editAmount),
-        expenseDate: editExpenseDate,
-      })
-
+      await api.put(`/reimbursements/${request.id}`, data)
       handleCloseEditModal()
 
       await loadRequest()
@@ -326,16 +312,14 @@ export function ReimbursementDetail() {
         open={editModalOpen}
         categories={categories}
         actionLoading={actionLoading}
-        categoryId={editCategoryId}
-        description={editDescription}
-        amount={editAmount}
-        expenseDate={editExpenseDate}
+        categoryId={request.category?.id ?? ""}
+        description={request.description}
+        amount={String(request.amount)}
+        expenseDate={convertBrazilianDateToInputDate(
+          request.expenseDate
+        )}
         onClose={handleCloseEditModal}
         onSubmit={handleUpdateRequest}
-        onChangeCategoryId={setEditCategoryId}
-        onChangeDescription={setEditDescription}
-        onChangeAmount={setEditAmount}
-        onChangeExpenseDate={setEditExpenseDate}
       />
 
       <RejectReimbursementModal
