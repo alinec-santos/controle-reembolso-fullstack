@@ -1,11 +1,21 @@
-import { FormEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { api } from "../api/api"
 import { useAuth } from "../contexts/AuthContext"
 import type { Category } from "../types/category"
 import { CategoryForm } from "../components/categories/CategoryForm"
 import { CategoriesTable } from "../components/categories/CategoriesTable"
-import { AxiosError } from "axios"
+import { getApiErrorMessage } from "../utils/getApiErrorMessage"
+
+const categorySchema = z.object({
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  active: z.boolean(),
+})
+
+type CategoryFormData = z.infer<typeof categorySchema>
 
 export function Categories() {
   const navigate = useNavigate()
@@ -19,12 +29,24 @@ export function Categories() {
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
 
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
-
-  const [name, setName] = useState("")
-  const [active, setActive] = useState(true)
+  const [editingCategoryId, setEditingCategoryId] =
+    useState<string | null>(null)
 
   const isEditing = Boolean(editingCategoryId)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
+      name: "",
+      active: true,
+    },
+  })
 
   async function loadCategories() {
     try {
@@ -34,8 +56,8 @@ export function Categories() {
       const response = await api.get("/categories")
 
       setCategories(response.data)
-    } catch {
-      setError("Erro ao carregar categorias")
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Erro ao carregar categorias"))
     } finally {
       setLoading(false)
     }
@@ -43,36 +65,32 @@ export function Categories() {
 
   function resetForm() {
     setEditingCategoryId(null)
-    setName("")
-    setActive(true)
+
+    reset({
+      name: "",
+      active: true,
+    })
   }
 
   function handleEdit(category: Category) {
     setEditingCategoryId(category.id)
-    setName(category.name)
-    setActive(category.active)
+
+    setValue("name", category.name)
+    setValue("active", category.active)
   }
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-
+  async function onSubmit(data: CategoryFormData) {
     try {
       setActionLoading(true)
       setError("")
       setSuccessMessage("")
 
       if (isEditing) {
-        await api.put(`/categories/${editingCategoryId}`, {
-          name,
-          active,
-        })
+        await api.put(`/categories/${editingCategoryId}`, data)
 
         setSuccessMessage("Categoria atualizada com sucesso.")
       } else {
-        await api.post("/categories", {
-          name,
-          active,
-        })
+        await api.post("/categories", data)
 
         setSuccessMessage("Categoria criada com sucesso.")
       }
@@ -81,12 +99,7 @@ export function Categories() {
 
       await loadCategories()
     } catch (error) {
-    if (error instanceof AxiosError) {
-        setError(error.response?.data?.message ?? "Erro ao salvar categoria")
-        return
-    }
-
-    setError("Erro ao salvar categoria")
+      setError(getApiErrorMessage(error, "Erro ao salvar categoria"))
     } finally {
       setActionLoading(false)
     }
@@ -115,11 +128,9 @@ export function Categories() {
       <CategoryForm
         isEditing={isEditing}
         actionLoading={actionLoading}
-        name={name}
-        active={active}
-        onChangeName={setName}
-        onChangeActive={setActive}
-        onSubmit={handleSubmit}
+        register={register}
+        errors={errors}
+        onSubmit={handleSubmit(onSubmit)}
         onCancelEdit={resetForm}
       />
 

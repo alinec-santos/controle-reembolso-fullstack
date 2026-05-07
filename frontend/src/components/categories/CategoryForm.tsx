@@ -1,23 +1,27 @@
-import { FormEvent } from "react"
+import type {
+  FieldErrors,
+  UseFormRegister,
+} from "react-hook-form"
+
+type CategoryFormData = {
+  name: string
+  active: boolean
+}
 
 type Props = {
   isEditing: boolean
   actionLoading: boolean
-  name: string
-  active: boolean
-  onChangeName: (value: string) => void
-  onChangeActive: (value: boolean) => void
-  onSubmit: (event: FormEvent) => void
+  register: UseFormRegister<CategoryFormData>
+  errors: FieldErrors<CategoryFormData>
+  onSubmit: () => void
   onCancelEdit: () => void
 }
 
 export function CategoryForm({
   isEditing,
   actionLoading,
-  name,
-  active,
-  onChangeName,
-  onChangeActive,
+  register,
+  errors,
   onSubmit,
   onCancelEdit,
 }: Props) {
@@ -28,23 +32,16 @@ export function CategoryForm({
       <form onSubmit={onSubmit}>
         <div>
           <label htmlFor="name">Nome</label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(event) => onChangeName(event.target.value)}
-            required
-          />
+
+          <input id="name" type="text" {...register("name")} />
+
+          {errors.name && <p>{errors.name.message}</p>}
         </div>
 
         <div>
           <label htmlFor="active">Ativa</label>
-          <input
-            id="active"
-            type="checkbox"
-            checked={active}
-            onChange={(event) => onChangeActive(event.target.checked)}
-          />
+
+          <input id="active" type="checkbox" {...register("active")} />
         </div>
 
         <button type="submit" disabled={actionLoading}>
