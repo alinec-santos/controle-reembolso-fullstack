@@ -5,6 +5,7 @@ import { Dashboard } from "../pages/Dashboard"
 import { CreateReimbursement } from "../pages/CreateReimbursement"
 import { ReimbursementDetail } from "../pages/ReimbursementDetail"
 import { Users } from "../pages/Users"
+import { Categories } from "../pages/Categories"
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth()
@@ -19,6 +20,7 @@ export function AppRoutes() {
       <Route path="/reimbursements/new" element={<CreateReimbursement />} />
       <Route path="/reimbursements/:id" element={<ReimbursementDetail />} />
       <Route path="/users" element={<Users />} />
+      <Route path="/categories" element={<Categories />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   )

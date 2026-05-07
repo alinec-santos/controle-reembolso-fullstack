@@ -51,6 +51,12 @@ export function Dashboard() {
         </button>
         )}
 
+        {user?.role === "ADMIN" && (
+          <button onClick={() => navigate("/categories")}>
+            Gerenciar categorias
+          </button>
+        )}
+
         <button onClick={logout}>Sair</button>
       </header>
 
