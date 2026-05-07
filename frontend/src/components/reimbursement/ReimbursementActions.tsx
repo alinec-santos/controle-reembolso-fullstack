@@ -3,14 +3,17 @@ type Props = {
   status: string
   actionLoading: boolean
   onOpenEditModal: () => void
+  onSubmitRequest: () => void
   onCancelRequest: () => void
   onApproveRequest: () => void
 }
+
 export function ReimbursementActions({
   userRole,
   status,
   actionLoading,
   onOpenEditModal,
+  onSubmitRequest,
   onCancelRequest,
   onApproveRequest,
 }: Props) {
@@ -24,8 +27,12 @@ export function ReimbursementActions({
             Editar solicitação
           </button>
 
-          <button type="button" disabled={actionLoading}>
-            Enviar solicitação
+          <button
+            type="button"
+            onClick={onSubmitRequest}
+            disabled={actionLoading}
+          >
+            {actionLoading ? "Enviando..." : "Enviar solicitação"}
           </button>
 
           <button
@@ -57,6 +64,7 @@ export function ReimbursementActions({
           >
             {actionLoading ? "Aprovando..." : "Aprovar"}
           </button>
+
           <button type="button">Rejeitar</button>
         </>
       )}

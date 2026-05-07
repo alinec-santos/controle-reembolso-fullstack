@@ -149,6 +149,26 @@ export function ReimbursementDetail() {
     }
   }
 
+  async function handleSubmitRequest() {
+    if (!request) return
+
+    try {
+        setActionLoading(true)
+        setError("")
+        setSuccessMessage("")
+
+        await api.post(`/reimbursements/${request.id}/submit`)
+
+        setSuccessMessage("Solicitação enviada com sucesso.")
+
+        await loadRequest()
+    } catch {
+        setError("Erro ao enviar solicitação")
+    } finally {
+        setActionLoading(false)
+    }
+  }
+
   async function handleCancelRequest() {
     if (!request) return
 
@@ -181,26 +201,7 @@ export function ReimbursementDetail() {
         setActionLoading(false)
     }
   }
-  async function handleApproveRequest() {
-    if (!request) return
-
-    try {
-        setActionLoading(true)
-        setError("")
-        setSuccessMessage("")
-
-        await api.post(`/reimbursements/${request.id}/approve`)
-
-        setSuccessMessage("Solicitação aprovada com sucesso.")
-
-        await loadRequest()
-    } catch {
-        setError("Erro ao aprovar solicitação")
-    } finally {
-        setActionLoading(false)
-    }
-  }
-
+  
   useEffect(() => {
     loadRequest()
     loadCategories()
@@ -256,6 +257,7 @@ export function ReimbursementDetail() {
         userRole={user?.role}
         status={request.status}
         actionLoading={actionLoading}
+        onSubmitRequest={handleSubmitRequest}
         onOpenEditModal={handleOpenEditModal}
         onCancelRequest={handleCancelRequest}
         onApproveRequest={handleApproveRequest}
