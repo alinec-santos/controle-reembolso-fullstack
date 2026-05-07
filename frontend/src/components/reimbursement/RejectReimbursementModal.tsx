@@ -1,49 +1,79 @@
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+const rejectSchema = z.object({
+  reason: z
+    .string()
+    .min(5, "Justificativa deve ter pelo menos 5 caracteres"),
+})
+
+type RejectFormData = z.infer<typeof rejectSchema>
+
 type Props = {
   open: boolean
-  reason: string
   actionLoading: boolean
   onClose: () => void
-  onSubmit: () => void
-  onChangeReason: (value: string) => void
+  onSubmit: (reason: string) => void
 }
 
 export function RejectReimbursementModal({
   open,
-  reason,
   actionLoading,
   onClose,
   onSubmit,
-  onChangeReason,
 }: Props) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RejectFormData>({
+    resolver: zodResolver(rejectSchema),
+    defaultValues: {
+      reason: "",
+    },
+  })
+
   if (!open) return null
+
+  function handleClose() {
+    reset()
+    onClose()
+  }
+
+  function submit(data: RejectFormData) {
+    onSubmit(data.reason)
+
+    reset()
+  }
 
   return (
     <div>
       <h3>Rejeitar solicitação</h3>
 
-      <div>
-        <label htmlFor="reason">Justificativa</label>
+      <form onSubmit={handleSubmit(submit)}>
+        <div>
+          <label htmlFor="reason">Justificativa</label>
 
-        <textarea
-          id="reason"
-          value={reason}
-          onChange={(event) => onChangeReason(event.target.value)}
-          placeholder="Informe o motivo da rejeição"
-          rows={5}
-        />
-      </div>
+          <textarea
+            id="reason"
+            placeholder="Informe o motivo da rejeição"
+            rows={5}
+            {...register("reason")}
+          />
 
-      <button type="button" onClick={onClose}>
-        Cancelar
-      </button>
+          {errors.reason && <p>{errors.reason.message}</p>}
+        </div>
 
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={actionLoading || !reason.trim()}
-      >
-        {actionLoading ? "Rejeitando..." : "Rejeitar solicitação"}
-      </button>
+        <button type="button" onClick={handleClose}>
+          Cancelar
+        </button>
+
+        <button type="submit" disabled={actionLoading}>
+          {actionLoading ? "Rejeitando..." : "Rejeitar solicitação"}
+        </button>
+      </form>
     </div>
   )
 }

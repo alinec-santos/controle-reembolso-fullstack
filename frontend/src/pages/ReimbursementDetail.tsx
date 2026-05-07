@@ -51,7 +51,7 @@ export function ReimbursementDetail() {
   const [successMessage, setSuccessMessage] = useState("")
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
-  const [rejectReason, setRejectReason] = useState("")
+
 
   async function loadRequest() {
     try {
@@ -209,10 +209,9 @@ export function ReimbursementDetail() {
 
   function handleCloseRejectModal() {
     setRejectModalOpen(false)
-    setRejectReason("")
   }
 
-  async function handleRejectRequest() {
+  async function handleRejectRequest(reason: string) {
     if (!request) return
 
     try {
@@ -221,7 +220,7 @@ export function ReimbursementDetail() {
       setSuccessMessage("")
 
       await api.post(`/reimbursements/${request.id}/reject`, {
-        reason: rejectReason,
+        reason,
       })
 
       setSuccessMessage("Solicitação rejeitada com sucesso.")
@@ -356,11 +355,9 @@ export function ReimbursementDetail() {
 
       <RejectReimbursementModal
         open={rejectModalOpen}
-        reason={rejectReason}
         actionLoading={actionLoading}
         onClose={handleCloseRejectModal}
         onSubmit={handleRejectRequest}
-        onChangeReason={setRejectReason}
       />
     </main>
   )
