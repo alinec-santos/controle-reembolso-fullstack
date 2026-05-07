@@ -6,7 +6,10 @@ import { useAuth } from "../contexts/AuthContext"
 import { getApiErrorMessage } from "../utils/getApiErrorMessage"
 
 const loginSchema = z.object({
-  email: z.string().email("Informe um e-mail válido"),
+  email: z
+  .string()
+  .email("Informe um e-mail válido")
+  .refine((email) => email.includes("."), "Informe um e-mail válido"),
   password: z.string().min(1, "Informe a senha"),
 })
 
