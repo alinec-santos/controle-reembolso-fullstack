@@ -7,6 +7,7 @@ type Props = {
   onCancelRequest: () => void
   onApproveRequest: () => void
   onOpenRejectModal: () => void
+  onPayRequest: () => void
 }
 
 export function ReimbursementActions({
@@ -18,6 +19,7 @@ export function ReimbursementActions({
   onCancelRequest,
   onApproveRequest,
   onOpenRejectModal,
+  onPayRequest,
 }: Props) {
   return (
     <section>
@@ -78,7 +80,13 @@ export function ReimbursementActions({
       )}
 
       {userRole === "FINANCEIRO" && status === "APROVADO" && (
-        <button type="button">Marcar como paga</button>
+        <button
+          type="button"
+          onClick={onPayRequest}
+          disabled={actionLoading}
+        >
+          {actionLoading ? "Pagando..." : "Marcar como paga"}
+        </button>
       )}
     </section>
   )

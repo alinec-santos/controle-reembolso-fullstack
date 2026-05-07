@@ -236,6 +236,25 @@ export function ReimbursementDetail() {
     }
   }
   
+  async function handlePayRequest() {
+    if (!request) return
+
+    try {
+      setActionLoading(true)
+      setError("")
+      setSuccessMessage("")
+
+      await api.post(`/reimbursements/${request.id}/pay`)
+
+      setSuccessMessage("Solicitação paga com sucesso.")
+
+      await loadRequest()
+    } catch {
+      setError("Erro ao pagar solicitação")
+    } finally {
+      setActionLoading(false)
+    }
+  }
   useEffect(() => {
     loadRequest()
     loadCategories()
@@ -296,6 +315,7 @@ export function ReimbursementDetail() {
         onCancelRequest={handleCancelRequest}
         onApproveRequest={handleApproveRequest}
         onOpenRejectModal={() => setRejectModalOpen(true)}
+        onPayRequest={handlePayRequest}
         
       />
 
