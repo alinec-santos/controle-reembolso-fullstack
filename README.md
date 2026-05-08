@@ -286,6 +286,7 @@ Testes incluem:
 - RBAC
 - fluxos de aprovação/rejeição/pagamento
 
+Obs: sempre que os testes automatizados do backend forem realizados, será necessário popular o banco de dados novamente se a utilização do docker não estiver sendo feita. 
 ---
 
 ## Frontend
@@ -304,14 +305,97 @@ Testes incluem:
 
 ---
 
-# Testes Manuais da API
+# Testes Manuais da API (Postman)
 
-A API pode ser testada utilizando:
-- Postman
-- Insomnia
+A collection do Postman está disponível em:
 
-Collection do Postman:
-> Em desenvolvimento
+```txt
+docs/postman/
+```
+
+Arquivo exportado:
+
+```txt
+controle-reembolso-api.postman_collection.json
+```
+
+---
+
+## Como importar a collection
+
+1. Abra o Postman
+2. Clique em `Import`
+3. Selecione o arquivo:
+
+```txt
+docs/postman/controle-reembolso-api.postman_collection.json
+```
+
+---
+
+## Criando o Environment manualmente
+
+No Postman:
+
+1. Clique em `Environments`
+2. Crie um environment chamado:
+
+```txt
+LOCAL
+```
+
+3. Adicione a variável:
+
+| VARIABLE | VALUE |
+|---|---|
+| baseUrl | http://localhost:3000 |
+
+---
+
+## Autenticação JWT
+
+As rotas protegidas utilizam Bearer Token JWT.
+
+As requests de login possuem scripts automáticos que salvam o token JWT na variável:
+
+```txt
+{{token}}
+```
+
+Após executar uma request de login:
+- Login Admin
+- Login Gestor
+- Login Financeiro
+- Login Colaborador
+
+o token será salvo automaticamente e reutilizado nas demais rotas protegidas.
+
+---
+
+## Fluxos disponíveis na collection
+
+### Auth
+- Login Admin
+- Login Gestor
+- Login Financeiro
+- Login Colaborador
+
+### Users
+- Criar usuário
+- Listar usuários
+
+### Categories
+- Criar categoria
+- Listar categorias
+
+### Reimbursements
+- Criar solicitação
+- Listar solicitações
+- Enviar solicitação
+- Aprovar solicitação
+- Rejeitar solicitação
+- Marcar como pago
+- Buscar histórico
 
 ---
 
