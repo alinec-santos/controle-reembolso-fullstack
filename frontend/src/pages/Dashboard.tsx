@@ -30,8 +30,8 @@ const LogoutIcon = () => (
 export function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-
   const [requests, setRequests] = useState<ReimbursementRequest[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -49,6 +49,12 @@ export function Dashboard() {
       setIsLoading(false)
     }
   }
+
+  const filteredRequests = requests.filter(request => 
+    request.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.status.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   useEffect(() => {
     loadRequests()
@@ -154,7 +160,8 @@ export function Dashboard() {
                  type="text" 
                  className="bg-gray-50 border border-gray-200 text-gray-900 text-base rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C13227] focus:border-[#C13227] block w-full pl-10 p-2.5" 
                  placeholder="Pesquisar..." 
-                 readOnly 
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
                />
             </div>
           </div>
@@ -164,11 +171,11 @@ export function Dashboard() {
             
             {error && <p className="p-6 text-red-500 text-center font-medium">{error}</p>}
             
-            {!isLoading && !error && requests.length === 0 && (
+            {!isLoading && !error && filteredRequests.length === 0 && (
               <p className="p-10 text-gray-500 text-center font-medium">Nenhuma solicitação encontrada.</p>
             )}
 
-            {!isLoading && !error && requests.length > 0 && (
+            {!isLoading && !error && filteredRequests.length > 0 && (
               <table className="w-full text-base text-left text-slate-600">
                 <thead className="text-sm text-white bg-[#C13227] uppercase tracking-wider">
                   <tr>
@@ -181,7 +188,7 @@ export function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((request) => (
+                  {filteredRequests.map((request) => (
                     <tr key={request.id} className="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-slate-800">{request.description}</td>
                       <td className="px-6 py-4">{request.category?.name ?? "Sem categoria"}</td>

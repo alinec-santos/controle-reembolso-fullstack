@@ -1,3 +1,4 @@
+import { useState } from "react"
 import type { User } from "../../types/Users"
 
 type Props = {
@@ -21,6 +22,14 @@ const SearchIcon = () => (
 )
 
 export function UsersTable({ users, loading, onEdit }: Props) {
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   return (
     <section className="bg-white rounded-lg shadow-[0_2px_10px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
       <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -34,7 +43,8 @@ export function UsersTable({ users, loading, onEdit }: Props) {
              type="text" 
              className="bg-gray-50 border border-gray-200 text-gray-900 text-base rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C13227] focus:border-[#C13227] block w-full pl-10 p-2.5" 
              placeholder="Buscar usuário..." 
-             readOnly 
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
            />
         </div>
       </div>
@@ -42,11 +52,11 @@ export function UsersTable({ users, loading, onEdit }: Props) {
       <div className="overflow-x-auto">
         {loading && <p className="p-6 text-gray-500 text-center text-base font-medium">Carregando usuários...</p>}
 
-        {!loading && users.length === 0 && (
+        {!loading && filteredUsers.length === 0 && (
           <p className="p-10 text-gray-500 text-center text-base font-medium">Nenhum usuário encontrado.</p>
         )}
 
-        {!loading && users.length > 0 && (
+        {!loading && filteredUsers.length > 0 && (
           <table className="w-full text-base text-left text-slate-600">
             <thead className="text-sm text-white bg-[#C13227] uppercase tracking-wider">
               <tr>
@@ -60,7 +70,7 @@ export function UsersTable({ users, loading, onEdit }: Props) {
             </thead>
 
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 font-medium text-slate-800">{user.name}</td>
                   <td className="px-6 py-4">{user.email}</td>

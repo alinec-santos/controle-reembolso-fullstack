@@ -83,19 +83,22 @@ export function HistoryModal({ open, histories, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 font-sans">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-[500px] overflow-hidden flex flex-col h-fit max-h-[85vh]">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-[800px] overflow-hidden flex flex-col h-fit max-h-[85vh]">
         
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
               <HistoryIcon />
             </div>
-            <h2 className="text-xl font-bold text-slate-800">Histórico da Solicitação</h2>
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Histórico de Auditoria</h2>
+              <p className="text-sm text-slate-500 font-medium mt-0.5">Acompanhamento de todas as ações da solicitação</p>
+            </div>
           </div>
           <button 
             type="button" 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 border border-indigo-100 transition-colors p-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+            className="text-gray-400 hover:text-gray-600 border border-gray-200 bg-white transition-colors p-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
           >
             <CloseIcon />
           </button>
@@ -105,46 +108,48 @@ export function HistoryModal({ open, histories, onClose }: Props) {
           {!histories || histories.length === 0 ? (
             <p className="text-slate-500 text-center py-8">Nenhum histórico encontrado.</p>
           ) : (
-            <div className="relative">
-              {/* Vertical timeline line */}
-              <div className="absolute left-4 top-4 bottom-4 w-px bg-gray-200"></div>
-              
-              <ul className="space-y-6">
-                {histories.map((history) => {
-                  const style = getActionStyle(history.action)
-                  return (
-                    <li key={history.id} className="relative flex gap-4">
-                      {style.icon}
-                      
-                      <div className="flex-1 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className={`px-2.5 py-1 rounded-md text-xs tracking-wider uppercase ${style.badge}`}>
+            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-4 py-3 text-xs font-bold tracking-wider text-slate-500 uppercase whitespace-nowrap">
+                      Data / Hora
+                    </th>
+                    <th className="px-4 py-3 text-xs font-bold tracking-wider text-slate-500 uppercase whitespace-nowrap">
+                      Usuário
+                    </th>
+                    <th className="px-4 py-3 text-xs font-bold tracking-wider text-slate-500 uppercase whitespace-nowrap">
+                      Ação
+                    </th>
+                    <th className="px-4 py-3 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                      Observação
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {histories.map((history) => {
+                    const style = getActionStyle(history.action)
+                    return (
+                      <tr key={history.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-4 text-sm font-medium text-slate-600 whitespace-nowrap">
+                          {history.createdAt}
+                        </td>
+                        <td className="px-4 py-4 text-sm font-bold text-slate-800 whitespace-nowrap">
+                          {history.user?.name ?? "Sistema"}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase ${style.badge}`}>
                             {history.action}
                           </span>
-                          <div className="flex items-center gap-1.5 text-slate-500">
-                            <CalendarIcon />
-                            <span className="text-sm font-medium">{history.createdAt}</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div>
-                            <span className="block text-xs font-medium text-slate-500 mb-0.5">Usuário</span>
-                            <span className="block text-sm font-bold text-slate-800">{history.user?.name ?? "Sistema"}</span>
-                          </div>
-
-                          {history.observation && (
-                            <div>
-                              <span className="block text-xs font-medium text-slate-500 mb-0.5">Observação</span>
-                              <p className="text-sm font-semibold text-slate-800">{history.observation}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
+                        </td>
+                        <td className="px-4 py-4 text-sm font-medium text-slate-700 min-w-[200px]">
+                          {history.observation ? history.observation : <span className="text-gray-400 italic">Sem observação</span>}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
