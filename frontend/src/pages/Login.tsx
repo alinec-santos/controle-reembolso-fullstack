@@ -160,7 +160,10 @@ export function Login() {
               >
                 {isLoading ? "Entrando..." : (
                   <>
-                    Entrar na Plataforma <ArrowRightIcon />
+                    <span className="sr-only">Entrar</span>
+                    <span aria-hidden="true" className="flex items-center">
+                      Entrar na Plataforma <ArrowRightIcon />
+                    </span>
                   </>
                 )}
               </button>

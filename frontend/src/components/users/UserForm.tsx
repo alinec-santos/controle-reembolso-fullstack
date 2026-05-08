@@ -106,7 +106,7 @@ export function UserForm({
               ? "Salvando..."
               : isEditing
                 ? "Salvar edição"
-                : <><span className="text-xl leading-none mb-[2px]">+</span> Criar usuário</>}
+                : <><span aria-hidden="true" className="text-xl leading-none mb-[2px]">+</span> Criar usuário</>}
           </button>
         </div>
       </form>

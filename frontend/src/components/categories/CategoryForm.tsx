@@ -75,7 +75,7 @@ export function CategoryForm({
               ? "Salvando..."
               : isEditing
                 ? "Salvar edição"
-                : <><span className="text-xl leading-none mb-[2px]">+</span> Criar categoria</>}
+                : <><span aria-hidden="true" className="text-xl leading-none mb-[2px]">+</span> Criar categoria</>}
           </button>
         </div>
       </form>

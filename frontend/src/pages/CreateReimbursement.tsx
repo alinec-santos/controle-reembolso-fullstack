@@ -119,9 +119,9 @@ export function CreateReimbursement() {
 
       const response = await api.post("/reimbursements", payload)
       
-      const newId = response.data.id
+      const newId = response.data?.id
 
-      if (attachments.length > 0) {
+      if (newId && attachments.length > 0) {
         for (const attachment of attachments) {
           await api.post(`/reimbursements/${newId}/attachments`, attachment)
         }
