@@ -4,10 +4,9 @@ type Props = {
   attachments?: Attachment[]
   userRole?: string
   status: string
-  onOpenModal: () => void
 }
 
-export function AttachmentsSection({ attachments, userRole, status, onOpenModal }: Props) {
+export function AttachmentsSection({ attachments, userRole, status }: Props) {
   return (
     <section>
       <h2>Anexos</h2>
@@ -27,11 +26,6 @@ export function AttachmentsSection({ attachments, userRole, status, onOpenModal 
         </ul>
       )}
 
-      {userRole === "COLABORADOR" && status === "RASCUNHO" && (
-        <button type="button" onClick={onOpenModal}>
-          Adicionar anexo
-        </button>
-      )}
     </section>
   )
 }
