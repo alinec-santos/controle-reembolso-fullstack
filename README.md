@@ -435,14 +435,28 @@ o token será salvo automaticamente e reutilizado nas demais rotas protegidas.
 
 ---
 
-# Documentação
+# Documentação Complementar
 
-Documentações complementares disponíveis na pasta:
+Para informações mais detalhadas sobre a arquitetura, implementação e decisões técnicas:
+
+## Backend
 
 ```txt
-/docs
+docs/documentacao-backend-pitang
 ```
 
+## Frontend
+
+```txt
+docs/documentacao-detalhada-frontend-pitang
+```
+
+
+## Especificação do projeto
+
+```txt
+docs/especificacao-pitang
+```
 ---
 
 # Autor
