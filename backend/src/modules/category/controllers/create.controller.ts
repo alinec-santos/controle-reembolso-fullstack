@@ -8,13 +8,12 @@ export async function createCategoryController(req: Request, res: Response) {
   try {
     const data = categorySchema.parse(req.body)
 
-    const categoryAlreadyExists = await prisma.category.findFirst({
-      where: {
-        name: {
-          equals: data.name.trim(),
-        },
-      },
-    })
+    const categories = await prisma.category.findMany()
+    const nameNormalized = data.name.trim().toLowerCase()
+    
+    const categoryAlreadyExists = categories.find(
+      (cat) => cat.name.trim().toLowerCase() === nameNormalized
+    )
 
     if (categoryAlreadyExists) {
       throw new AppError("Categoria já cadastrada", 409)

@@ -93,6 +93,19 @@ export function Categories() {
       setError("")
       setSuccessMessage("")
 
+      const nameNormalized = data.name.trim().toLowerCase()
+      const categoryExists = categories.some(
+        (cat) => 
+          cat.name.trim().toLowerCase() === nameNormalized && 
+          cat.id !== editingCategoryId
+      )
+
+      if (categoryExists) {
+        setError("Já existe uma categoria com este nome.")
+        setActionLoading(false)
+        return
+      }
+
       if (isEditing) {
         await api.put(`/categories/${editingCategoryId}`, data)
 

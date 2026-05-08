@@ -113,6 +113,41 @@ describe("Categories", () => {
     expect(response.body.active).toBe(false)
   })
 
+  it("não deve criar categoria com nome duplicado", async () => {
+    await prisma.category.create({
+      data: { name: "Transporte" }
+    })
+
+    const response = await request(app)
+      .post("/categories")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        name: "TRANSPORTE"
+      })
+
+    expect(response.status).toBe(409)
+    expect(response.body.message).toBe("Categoria já cadastrada")
+  })
+
+  it("não deve atualizar categoria para um nome já existente", async () => {
+    await prisma.category.create({
+      data: { name: "Transporte" }
+    })
+    const category = await prisma.category.create({
+      data: { name: "Alimentação" }
+    })
+
+    const response = await request(app)
+      .put(`/categories/${category.id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        name: "transporte"
+      })
+
+    expect(response.status).toBe(409)
+    expect(response.body.message).toBe("Já existe uma categoria com este nome")
+  })
+
   it("não deve listar categorias sem autenticação", async () => {
     const response = await request(app)
       .get("/categories")

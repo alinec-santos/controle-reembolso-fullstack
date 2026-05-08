@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { ZodError } from "zod"
 import { prisma } from "../../../lib/prisma"
 import { categorySchema } from "../schemas/category.schema"
+import { AppError } from "../../../errors/AppError"
 
 export async function updateCategoryController(req: Request, res: Response) {
   try {
@@ -13,7 +14,18 @@ export async function updateCategoryController(req: Request, res: Response) {
     })
 
     if (!categoryExists) {
-      return res.status(404).json({ message: "Categoria não encontrada" })
+      throw new AppError("Categoria não encontrada", 404)
+    }
+
+    const categories = await prisma.category.findMany()
+    const nameNormalized = data.name.trim().toLowerCase()
+
+    const categoryAlreadyExists = categories.find(
+      (cat) => cat.name.trim().toLowerCase() === nameNormalized && cat.id !== id
+    )
+
+    if (categoryAlreadyExists) {
+      throw new AppError("Já existe uma categoria com este nome", 409)
     }
 
     const category = await prisma.category.update({
@@ -29,6 +41,12 @@ export async function updateCategoryController(req: Request, res: Response) {
     if (error instanceof ZodError) {
       return res.status(400).json({
         message: error.issues[0]?.message ?? "Dados inválidos"
+      })
+    }
+
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({
+        message: error.message,
       })
     }
 
