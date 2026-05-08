@@ -298,4 +298,115 @@ describe("Reimbursements", () => {
     expect(history.status).toBe(200)
     expect(history.body.length).toBeGreaterThan(0)
   })
+
+  // ========================
+  // FLUXOS NEGATIVOS
+  // ========================
+
+  it("não deve rejeitar sem justificativa", async () => {
+    const create = await request(app)
+      .post("/reimbursements")
+      .set("Authorization", `Bearer ${colaboradorToken}`)
+      .send({
+        categoryId,
+        description: "Sem justificativa",
+        amount: 80,
+        expenseDate: "2026-05-01"
+      })
+
+    const id = create.body.id
+
+    await request(app)
+      .post(`/reimbursements/${id}/submit`)
+      .set("Authorization", `Bearer ${colaboradorToken}`)
+
+    const reject = await request(app)
+      .post(`/reimbursements/${id}/reject`)
+      .set("Authorization", `Bearer ${gestorToken}`)
+      .send({}) // sem campo reason
+
+    expect(reject.status).toBe(400)
+  })
+
+  it("não deve pagar solicitação com status ENVIADO", async () => {
+    const create = await request(app)
+      .post("/reimbursements")
+      .set("Authorization", `Bearer ${colaboradorToken}`)
+      .send({
+        categoryId,
+        description: "Pagamento indevido",
+        amount: 120,
+        expenseDate: "2026-05-01"
+      })
+
+    const id = create.body.id
+
+    await request(app)
+      .post(`/reimbursements/${id}/submit`)
+      .set("Authorization", `Bearer ${colaboradorToken}`)
+
+    // Tenta pagar direto sem aprovar primeiro
+    const pay = await request(app)
+      .post(`/reimbursements/${id}/pay`)
+      .set("Authorization", `Bearer ${financeiroToken}`)
+
+    expect(pay.status).toBe(400)
+  })
+
+  it("não deve criar solicitação com categoria inativa", async () => {
+    const inactiveCategory = await prisma.category.create({
+      data: { name: "Categoria Inativa", active: false }
+    })
+
+    const res = await request(app)
+      .post("/reimbursements")
+      .set("Authorization", `Bearer ${colaboradorToken}`)
+      .send({
+        categoryId: inactiveCategory.id,
+        description: "Despesa com categoria inativa",
+        amount: 50,
+        expenseDate: "2026-05-01"
+      })
+
+    expect(res.status).toBe(400)
+  })
+
+  it("colaborador não deve acessar solicitação de outro colaborador", async () => {
+    // Cria um segundo colaborador
+    const outroColaborador = await prisma.user.create({
+      data: {
+        name: "Outro Colaborador",
+        email: "outro@test.com",
+        password: await bcrypt.hash("123456", 8),
+        role: "COLABORADOR"
+      }
+    })
+
+    const outroLogin = await request(app).post("/auth/login").send({
+      email: "outro@test.com",
+      password: "123456"
+    })
+
+    const outroToken = outroLogin.body.token
+
+    // Cria solicitação com o segundo colaborador
+    const create = await request(app)
+      .post("/reimbursements")
+      .set("Authorization", `Bearer ${outroToken}`)
+      .send({
+        categoryId,
+        description: "Solicitação do outro",
+        amount: 30,
+        expenseDate: "2026-05-01"
+      })
+
+    const id = create.body.id
+
+    // Tenta acessar com o primeiro colaborador
+    const show = await request(app)
+      .get(`/reimbursements/${id}`)
+      .set("Authorization", `Bearer ${colaboradorToken}`)
+
+    expect(show.status).toBe(403)
+  })
 })

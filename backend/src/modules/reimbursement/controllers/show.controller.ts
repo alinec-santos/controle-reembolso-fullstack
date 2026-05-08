@@ -71,8 +71,7 @@ export async function showRequestController(req: Request, res: Response) {
     updatedAt: formatDateTime(request.updatedAt),
     histories: request.histories.map((history) => ({
       ...history,
-      createdAt: formatDateTime(history.createdAt),
-      updatedAt: formatDateTime(history.updatedAt)
+      createdAt: formatDateTime(history.createdAt)
     }))
   })
 }

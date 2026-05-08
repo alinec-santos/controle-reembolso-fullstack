@@ -6,7 +6,6 @@ import { updateCategoryController } from "../modules/category/controllers/update
 import { authMiddleware } from "../middlewares/auth.middleware"
 import { roleMiddleware } from "../middlewares/role.middleware"
 import { validateParams } from "../middlewares/validate-params.middleware"
-import { validateParams } from "../middlewares/validate-params.middleware"
 import { idParamsSchema } from "../schemas/params.schema"
 
 
