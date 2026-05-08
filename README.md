@@ -1,4 +1,4 @@
-# controle-reembolso-fullstack# Controle de Reembolso Fullstack
+# Controle de Reembolso Fullstack
 
 Sistema fullstack para gerenciamento de solicitações de reembolso, desenvolvido como desafio técnico para a trilha de desenvolvimento fullstack da Pitang Agile IT.
 
